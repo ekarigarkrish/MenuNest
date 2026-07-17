@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  
+  --color-cayenne-red-50: #ffefe6;
+  --color-cayenne-red-100: #fee0cd;
+  --color-cayenne-red-200: #fdc09b;
+  --color-cayenne-red-300: #fda168;
+  --color-cayenne-red-400: #fc8236;
+  --color-cayenne-red-500: #fb6304;
+  --color-cayenne-red-600: #c94f03;
+  --color-cayenne-red-700: #973b02;
+  --color-cayenne-red-800: #642702;
+  --color-cayenne-red-900: #321401;
+  --color-cayenne-red-950: #230e01;
+
+  --color-space-indigo-50: #f0f0f5;
+  --color-space-indigo-100: #e0e1eb;
+  --color-space-indigo-200: #c1c3d7;
+  --color-space-indigo-300: #a2a5c3;
+  --color-space-indigo-400: #8487ae;
+  --color-space-indigo-500: #65699a;
+  --color-space-indigo-600: #51547b;
+  --color-space-indigo-700: #3c3f5d;
+  --color-space-indigo-800: #282a3e;
+  --color-space-indigo-900: #14151f;
+  --color-space-indigo-950: #0e0f16;
+
+  --color-orange-50: #fff5e6;
+  --color-orange-100: #feebcd;
+  --color-orange-200: #fed89a;
+  --color-orange-300: #fdc468;
+  --color-orange-400: #fdb035;
+  --color-orange-500: #fc9d03;
+  --color-orange-600: #ca7d02;
+  --color-orange-700: #975e02;
+  --color-orange-800: #653f01;
+  --color-orange-900: #321f01;
+  --color-orange-950: #231600;
+
+  --color-bright-snow-50: #f0f2f4;
+  --color-bright-snow-100: #e1e6ea;
+  --color-bright-snow-200: #c3ccd5;
+  --color-bright-snow-300: #a5b3c0;
+  --color-bright-snow-400: #8899aa;
+  --color-bright-snow-500: #6a7f95;
+  --color-bright-snow-600: #556677;
+  --color-bright-snow-700: #3f4c5a;
+  --color-bright-snow-800: #2a333c;
+  --color-bright-snow-900: #15191e;
+  --color-bright-snow-950: #0f1215;
+
+  --color-carbon-black-50: #f1f2f4;
+  --color-carbon-black-100: #e3e6e8;
+  --color-carbon-black-200: #c6ccd2;
+  --color-carbon-black-300: #aab3bb;
+  --color-carbon-black-400: #8e99a4;
+  --color-carbon-black-500: #717f8e;
+  --color-carbon-black-600: #5b6671;
+  --color-carbon-black-700: #444c55;
+  --color-carbon-black-800: #2d3339;
+  --color-carbon-black-900: #17191c;
+  --color-carbon-black-950: #101214;
+
+  --animate-fade-in-up: fade-in-up 0.8s ease-out both;
+  --animate-fade-in: fade-in 0.8s ease-out both;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-float-reverse: float-reverse 5s ease-in-out infinite;
+  --animate-blob: blob 7s infinite;
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes float-reverse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+  }
+
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+}
+
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
