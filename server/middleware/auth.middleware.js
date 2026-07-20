@@ -30,5 +30,5 @@ export const isAuthenticated = (roles = []) => {
             if (error.statusCode === 403) throw error;
             throw ApiError('Not authorized, token failed or expired', 401);
         }
-    }, 'authMiddleware');
+    }, 'authMiddleware => isAuthenticated');
 };
