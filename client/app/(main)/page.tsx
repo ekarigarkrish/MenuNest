@@ -32,12 +32,6 @@ export default function Home() {
 
         <div className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto space-y-8 animate-fade-in-up">
 
-          {/* Label pill */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-semibold px-4 py-1.5 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
-            Restaurant Automation Platform
-          </div>
-
           {/* Headline */}
           <h1 className="font-heading text-center text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.15] lg:leading-[1.1]">
             Transform Restaurant Operations
