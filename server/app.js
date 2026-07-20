@@ -9,7 +9,7 @@ import path from 'node:path'
 import config from './config/config.js'
 import { generateToken, doubleCsrfProtection } from './services/csrf.service.js'
 import helmet from 'helmet'
-import authRoutes from './routes/auth.routes.js'
+import indexRoutes from './routes/index.route.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -44,19 +44,19 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // app.get('/api/get/csrf-token', (req, res) => {
 //   const token = generateToken(req, res); // Sets 'x-csrf-token' hash cookie
-  
+
 //   // Set a separate non-HttpOnly cookie for Axios to automatically read
 //   res.cookie('csrf-token', token, {
 //      httpOnly: true,
-      // secure: !config.isDEV,
-      // sameSite: config.isDEV ? 'lax' : 'none',
+// secure: !config.isDEV,
+// sameSite: config.isDEV ? 'lax' : 'none',
 //   });
-  
+
 //   return res.status(200).json({ message: "CSRF cookies set successfully" });
 // })
 
 // app.use(doubleCsrfProtection)
-app.use('/api/auth', authRoutes)
+app.use('/', indexRoutes)
 
 // error handler
 app.use(globalErrorHandler)

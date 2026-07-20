@@ -7,6 +7,7 @@ export default {
     port: Number(process.env.PORT),
     clientOrigin: process.env.CLIENT_ORIGIN,
     csrfSecretKey: process.env.CSRF_SECERT_KEY,
+    secretKey: process.env.SECRET_KEY,
 
     // Databse
     db_host: process.env.DB_HOST,

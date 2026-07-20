@@ -11,9 +11,3 @@ export default {
     serverOrigin: process.env.NEXT_PUBLIC_SERVER_ORIGIN,
     clientOrigin: process.env.NEXT_PUBLIC_CLIENT_ORIGIN,
 }
-console.log({
-    node_env: process.env.NEXT_PUBLIC_NODE_ENV,
-    isDEV: process.env.NEXT_PUBLIC_NODE_ENV === 'dev',
-    serverOrigin: process.env.NEXT_PUBLIC_SERVER_ORIGIN,
-    clientOrigin: process.env.NEXT_PUBLIC_CLIENT_ORIGIN,
-});

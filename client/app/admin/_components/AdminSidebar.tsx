@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Fetch } from "@/config/axios.config";
 import Button from "@/components/ui/Button";
-import {toast} from 'sonner'
+import { toast } from 'sonner'
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -17,13 +17,15 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  Grid3x3
 } from "lucide-react";
 
 const navItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
-  { name: "Orders", href: "/admin/orders", icon: ClipboardList },
+  { name: "Table Management", href: "/admin/table-management", icon: Grid3x3 },
+  { name: "Orders", href: "/admin/order-management", icon: ClipboardList },
   { name: "Customers", href: "/admin/customers", icon: Users },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
@@ -45,8 +47,8 @@ export default function AdminSidebar() {
     try {
       await Fetch.post('/api/auth/logout');
       router.push('/');
-    } catch (error:any) {
-    toast.error(error.response?.data?.message)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message)
     } finally {
       setIsLoggingOut(false);
     }
@@ -140,11 +142,10 @@ export default function AdminSidebar() {
                       key={item.name}
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
-                      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
-                        active
+                      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${active
                           ? "text-cayenne-red-600 font-semibold"
                           : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
-                      }`}
+                        }`}
                     >
                       {active && (
                         <motion.div
@@ -234,11 +235,10 @@ export default function AdminSidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
-                  active
-                    ? "text-cayenne-red-600 font-semibold"
+                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${active
+                    ? "text-cayenne-red-400 font-semibold"
                     : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
-                }`}
+                  }`}
               >
                 {active && (
                   <motion.div
@@ -247,9 +247,9 @@ export default function AdminSidebar() {
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
-                
+
                 <Icon className={`w-5 h-5 shrink-0 transition-colors ${active ? "text-cayenne-red-500" : "text-carbon-black-500 group-hover:text-carbon-black-800"}`} />
-                
+
                 {!isCollapsed ? (
                   <motion.span
                     initial={{ opacity: 0, width: 0 }}

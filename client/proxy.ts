@@ -1,10 +1,15 @@
-import { NextResponse,type NextRequest } from 'next/server'
-
+import { NextResponse, type NextRequest } from 'next/server'
 
 export default function proxy(req: NextRequest) {
-    return NextResponse.redirect(new URL('/', req.url))
+    const token = req.cookies.get('auth_token')?.value;
+
+    if (!token) {
+        return NextResponse.redirect(new URL('/', req.url));
+    }
+
+    return NextResponse.next();
 }
 
 export const config = {
-  matcher: '/about/:path*',
+    matcher: '/admin/:path*',
 }

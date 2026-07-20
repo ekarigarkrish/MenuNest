@@ -1,4 +1,4 @@
-import { ApiError, asyncHandler } from '../utils/helper.utils.js'
+import { ApiError, asyncHandler, signToken } from '../utils/helper.utils.js'
 import userModel from '../model/user.model.js'
 import config from '../config/config.js'
 
@@ -15,7 +15,9 @@ export default {
     const isPasswordMatch = await user.comparePassword(password)
     if (!isPasswordMatch) throw ApiError("Invalid Email & Password!", 401)
 
-    res.cookie("auth_token", '', {
+    const token = signToken({ userId: user.id , role:user.role })
+
+    res.cookie("auth_token", token, {
       httpOnly: true,
       secure: !config.isDEV,
       sameSite: config.isDEV ? 'lax' : 'none',

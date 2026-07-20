@@ -2,6 +2,8 @@ import { deleteFile } from './removeFile.utils.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import crypto from 'node:crypto'
+import config from '../config/config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -60,4 +62,47 @@ export const globalErrorHandler = (err, req, res, next) => {
             message: errorMessage,
         }
     )
+}
+
+// Token encryption utilities
+const ALGORITHM = 'aes-256-cbc';
+const IV_LENGTH = 16;
+
+const getEncryptionKey = () => {
+    const secret = config.secretKey;
+    // sha256 produces a 32-byte hash, which is required for aes-256-cbc
+    return crypto.createHash('sha256').update(String(secret)).digest();
+};
+
+export const signToken = (payload) => {
+    try {
+        const text = typeof payload === 'object' ? JSON.stringify(payload) : String(payload);
+        const iv = crypto.randomBytes(IV_LENGTH);
+        const cipher = crypto.createCipheriv(ALGORITHM, getEncryptionKey(), iv);
+        let encrypted = cipher.update(text);
+        encrypted = Buffer.concat([encrypted, cipher.final()]);
+        return iv.toString('hex') + ':' + encrypted.toString('hex');
+    } catch (error) {
+        throw new Error('Error signing token: ' + error.message);
+    }
+}
+
+export const decryptToken = (token) => {
+    try {
+        const textParts = token.split(':');
+        const iv = Buffer.from(textParts.shift(), 'hex');
+        const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+        const decipher = crypto.createDecipheriv(ALGORITHM, getEncryptionKey(), iv);
+        let decrypted = decipher.update(encryptedText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        
+        const decryptedString = decrypted.toString();
+        try {
+            return JSON.parse(decryptedString);
+        } catch (e) {
+            return decryptedString;
+        }
+    } catch (error) {
+        throw new Error('Error decrypting token: ' + error.message);
+    }
 }

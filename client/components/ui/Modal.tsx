@@ -189,16 +189,16 @@ export default function Modal({
             aria-modal="true"
             aria-labelledby={title ? "modal-title" : undefined}
             aria-describedby={description ? "modal-description" : undefined}
-            className={`relative z-10 bg-white dark:bg-carbon-black-900 border border-gray-100 dark:border-carbon-black-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${sizeClasses[size]} ${className}`}
+            className={`relative z-10 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${sizeClasses[size]} ${className}`}
           >
             {/* Header */}
             {(title || description || showCloseButton) && (
-              <div className="px-6 py-5 border-b border-gray-100 dark:border-carbon-black-800 flex items-start justify-between gap-4">
+              <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4">
                 <div className="flex-1">
                   {title && (
                     <h3
                       id="modal-title"
-                      className="text-xl font-heading font-semibold text-carbon-black-900 dark:text-white"
+                      className="text-xl font-heading font-semibold text-carbon-black-900"
                     >
                       {title}
                     </h3>
@@ -206,7 +206,7 @@ export default function Modal({
                   {description && (
                     <p
                       id="modal-description"
-                      className="mt-1 text-sm text-gray-500 dark:text-carbon-black-400"
+                      className="mt-1 text-sm text-gray-500"
                     >
                       {description}
                     </p>
@@ -215,7 +215,7 @@ export default function Modal({
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-carbon-black-800 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cayenne-red-500"
+                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cayenne-red-500"
                     aria-label="Close modal"
                   >
                     <X className="w-5 h-5" />
@@ -225,13 +225,13 @@ export default function Modal({
             )}
 
             {/* Scrollable Content Body */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 text-gray-600 dark:text-carbon-black-300">
+            <div className="flex-1 overflow-y-auto px-6 py-5 text-gray-600">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 bg-gray-50 dark:bg-carbon-black-950 border-t border-gray-100 dark:border-carbon-black-800 flex items-center justify-end gap-3">
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
                 {footer}
               </div>
             )}
