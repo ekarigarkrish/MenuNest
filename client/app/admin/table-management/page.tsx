@@ -1,78 +1,166 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, LayoutGrid } from "lucide-react";
+import { Plus, LayoutGrid, Layers } from "lucide-react";
 import Button from "../../../components/ui/Button";
 import Section from "../../../components/ui/Section";
 import Container from "../../../components/ui/Container";
 import { motion } from "framer-motion";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import TableCard from "./_components/TableCard";
 import AddTableModal from "./_components/AddTableModal";
+import BulkAddTableModal from "./_components/BulkAddTableModal";
 import EditTableModal from "./_components/EditTableModal";
 import QrCodeModal from "./_components/QrCodeModal";
 import DeleteTableModal from "./_components/DeleteTableModal";
+import { Fetch } from "@/config/axios.config";
 
 export interface TableData {
   id: string;
   name: string;
   tableToken: string;
-  capacity: number;
-  qrLogoUrl?: string;
+  qrLogo?: string
 }
 
-const mockTables: TableData[] = [
-  { id: "1", name: "Table 1", tableToken: "tbl_9xj2ka0", capacity: 2 },
-  { id: "2", name: "Table 2", tableToken: "tbl_4qm8vz1", capacity: 4 },
-  { id: "3", name: "Table 3", tableToken: "tbl_7ps5ly3", capacity: 4 },
-  { id: "4", name: "VIP 1", tableToken: "tbl_2nr6wt9", capacity: 8 },
-];
-
 export default function AdminTableMangementPage() {
-  const [tables, setTables] = useState<TableData[]>(mockTables);
+  const queryClient = useQueryClient();
+  const { data: tables = [], isLoading } = useQuery<TableData[]>({
+    queryKey: ['tables'],
+    queryFn: async () => {
+      const res = await Fetch.get('/api/table/all/data', { withCredentials: true });
+      return res.data.data;
+    }
+  });
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isBulkAddModalOpen, setIsBulkAddModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  
+
   const [selectedTable, setSelectedTable] = useState<TableData | null>(null);
   const [tableToEdit, setTableToEdit] = useState<TableData | null>(null);
   const [tableToDelete, setTableToDelete] = useState<TableData | null>(null);
 
-  const handleAddTable = (name: string, capacity: number, qrLogo?: File | null) => {
-    const newTable: TableData = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: name,
-      tableToken: `tbl_${Math.random().toString(36).substr(2, 9)}`,
-      capacity: capacity,
-      qrLogoUrl: qrLogo ? URL.createObjectURL(qrLogo) : undefined,
-    };
-    setTables([...tables, newTable]);
-    setIsAddModalOpen(false);
+  const addTableMutation = useMutation({
+    mutationFn: async (data: { name: string; qrLogo?: File | null }) => {
+      const formdata = new FormData();
+      formdata.append('name', data.name);
+      if (data.qrLogo) formdata.append('qrLogo', data.qrLogo);
+
+      const res = await Fetch.post('/api/table/tb-qrcode', formdata, { withCredentials: true })
+      return res.data;
+    },
+    onSuccess: (data: any) => {
+      queryClient.setQueryData(['tables'], (old: TableData[] = []) => [
+        ...old,
+        { id: data.table?.id, name: data.table?.name, tableToken: data.table?.tableToken }
+      ]);
+      setIsAddModalOpen(false);
+      toast.success(data.message || "Table added successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to add table");
+    }
+  });
+
+  const bulkAddTableMutation = useMutation({
+    mutationFn: async (data: { names: string[]; qrLogo?: File | null }) => {
+      const formdata = new FormData();
+      formdata.append('names', JSON.stringify(data.names));
+      if (data.qrLogo) formdata.append('qrLogo', data.qrLogo);
+
+      const res = await Fetch.post('/api/table/bulk-create', formdata, { withCredentials: true })
+      return res.data;
+    },
+    onSuccess: (data: any) => {
+      queryClient.setQueryData(['tables'], (old: TableData[] = []) => [
+        ...old,
+        ...(data.tables || [])
+      ]);
+      setIsBulkAddModalOpen(false);
+      toast.success(data.message || "Tables added successfully");
+      if (data.skipped?.length > 0) {
+        toast.info(`${data.skipped.length} tables were skipped as they already exist.`);
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to add tables");
+    }
+  });
+
+  const editTableMutation = useMutation({
+    mutationFn: async (data: { id: string; name: string; qrLogo?: File | null; removeLogo?: boolean }) => {
+      const formdata = new FormData();
+      formdata.append('name', data.name);
+      if (data.removeLogo) {
+        formdata.append('removeLogo', 'true');
+      }
+      if (data.qrLogo) {
+        formdata.append('qrLogo', data.qrLogo);
+      }
+
+      const res = await Fetch.put(`/api/table/tb-qrcode/${data.id}`, formdata, { withCredentials: true });
+      return res.data;
+    },
+    onSuccess: (data: any) => {
+      queryClient.setQueryData(['tables'], (old: TableData[] = []) => old.map(t => {
+        if (t.id === data.table?.id) {
+          return { ...t, name: data.table.name, qrLogo: data.table.qrLogo };
+        }
+        return t;
+      }));
+      setIsEditModalOpen(false);
+      toast.success(data.message || "Table updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update table");
+    }
+  });
+
+  const handleAddTable = (name: string, qrLogo?: File | null) => {
+    addTableMutation.mutate({ name, qrLogo });
   };
 
-  const handleEditTable = (id: string, name: string, capacity: number, qrLogo?: File | null, removeLogo?: boolean) => {
-    setTables(tables.map(t => {
-      if (t.id === id) {
-        let newLogoUrl = t.qrLogoUrl;
-        if (qrLogo) {
-          newLogoUrl = URL.createObjectURL(qrLogo);
-        } else if (removeLogo) {
-          newLogoUrl = undefined;
-        }
-        return { ...t, name, capacity, qrLogoUrl: newLogoUrl };
+  const handleBulkAddTable = (count: number, qrLogo?: File | null) => {
+    let maxNumber = 0;
+    tables.forEach(t => {
+      const match = t.name.match(/\d+/);
+      if (match) {
+        maxNumber = Math.max(maxNumber, parseInt(match[0]));
       }
-      return t;
-    }));
-    setIsEditModalOpen(false);
+    });
+
+    const names = Array.from({ length: count }).map((_, i) => `Table ${maxNumber + i + 1}`);
+    bulkAddTableMutation.mutate({ names, qrLogo });
   };
+
+  const handleEditTable = (id: string, name: string, qrLogo?: File | null, removeLogo?: boolean) => {
+    editTableMutation.mutate({ id, name, qrLogo, removeLogo });
+  };
+
+  const deleteTableMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await Fetch.delete(`/api/table/tb-qrcode/${id}`, { withCredentials: true });
+      return res.data;
+    },
+    onSuccess: (data: any, id: string) => {
+      queryClient.setQueryData(['tables'], (old: TableData[] = []) => old.filter((t) => t.id !== id));
+      setIsDeleteModalOpen(false);
+      setTableToDelete(null);
+      toast.success(data.message || "Table deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to delete table");
+    }
+  });
 
   const handleDelete = (id: string) => {
-    setTables(tables.filter((t) => t.id !== id));
-    setIsDeleteModalOpen(false);
-    setTableToDelete(null);
+    deleteTableMutation.mutate(id);
   };
 
-  const openEditModal = (table: TableData) => {
+  const openEditModal = async (table: TableData) => {
     setTableToEdit(table);
     setIsEditModalOpen(true);
   };
@@ -88,7 +176,7 @@ export default function AdminTableMangementPage() {
   };
 
   return (
-    <Section className="py-8 bg-gray-50 min-h-screen">
+    <Section className="py-8 bg-gray-50 rounded-2xl min-h-[calc(100vh-12rem)]">
       <Container>
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -100,30 +188,47 @@ export default function AdminTableMangementPage() {
               Manage your restaurant tables and generate unique QR codes for ordering.
             </p>
           </div>
-          <Button
-            leftIcon={<Plus className="w-5 h-5" />}
-            onClick={() => setIsAddModalOpen(true)}
-          >
-            Add New Table
-          </Button>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <Button
+              variant="outline"
+              leftIcon={<Layers className="w-5 h-5" />}
+              onClick={() => setIsBulkAddModalOpen(true)}
+              className="flex-1 md:flex-none"
+            >
+              Bulk Add
+            </Button>
+            <Button
+              leftIcon={<Plus className="w-5 h-5" />}
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex-1 md:flex-none"
+            >
+              Add New Table
+            </Button>
+          </div>
         </div>
 
         {/* Table Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {tables.map((table) => (
-            <TableCard
-              key={table.id}
-              table={table}
-              onOpenQrModal={openQrModal}
-              onOpenEditModal={openEditModal}
-              onConfirmDelete={confirmDelete}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-16 w-full">
+            <div className="w-8 h-8 border-4 border-cayenne-red-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {tables?.map((table) => (
+              <TableCard
+                key={table.id}
+                table={table}
+                onOpenQrModal={openQrModal}
+                onOpenEditModal={openEditModal}
+                onConfirmDelete={confirmDelete}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
-        {tables.length === 0 && (
-          <motion.div 
+        {!isLoading && tables.length === 0 && (
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm"
@@ -135,12 +240,21 @@ export default function AdminTableMangementPage() {
             <p className="text-gray-500 mb-6 max-w-sm mx-auto">
               Get started by adding your first table. You can then generate QR codes for customers to scan and order.
             </p>
-            <Button
-              leftIcon={<Plus className="w-5 h-5" />}
-              onClick={() => setIsAddModalOpen(true)}
-            >
-              Add Your First Table
-            </Button>
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                leftIcon={<Layers className="w-5 h-5" />}
+                onClick={() => setIsBulkAddModalOpen(true)}
+              >
+                Bulk Add
+              </Button>
+              <Button
+                leftIcon={<Plus className="w-5 h-5" />}
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Add Your First Table
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -149,6 +263,14 @@ export default function AdminTableMangementPage() {
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           onAdd={handleAddTable}
+          isPending={addTableMutation.isPending}
+        />
+
+        <BulkAddTableModal
+          isOpen={isBulkAddModalOpen}
+          onClose={() => setIsBulkAddModalOpen(false)}
+          onAdd={handleBulkAddTable}
+          isPending={bulkAddTableMutation.isPending}
         />
 
         <EditTableModal
@@ -156,6 +278,7 @@ export default function AdminTableMangementPage() {
           onClose={() => setIsEditModalOpen(false)}
           table={tableToEdit}
           onEdit={handleEditTable}
+          isPending={editTableMutation.isPending}
         />
 
         <QrCodeModal
@@ -169,6 +292,7 @@ export default function AdminTableMangementPage() {
           onClose={() => setIsDeleteModalOpen(false)}
           table={tableToDelete}
           onDelete={handleDelete}
+          isPending={deleteTableMutation.isPending}
         />
       </Container>
     </Section>

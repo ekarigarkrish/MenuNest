@@ -1,72 +1,91 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Users, Upload, X } from "lucide-react";
+import React, { useRef, useEffect } from "react";
+import Image from "next/image";
+import { Upload, X } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import Modal from "../../../../components/ui/Modal";
 import Button from "../../../../components/ui/Button";
 import { TableData } from "../page";
+import config from "@/config/config";
 
 interface EditTableModalProps {
   isOpen: boolean;
   onClose: () => void;
   table: TableData | null;
-  onEdit: (id: string, name: string, capacity: number, qrLogo?: File | null, removeLogo?: boolean) => void;
+  onEdit: (id: string, name: string, qrLogo?: File | null, removeLogo?: boolean) => void;
+  isPending?: boolean;
 }
+
+const schema = yup.object().shape({
+  name: yup.string().required("Table name is required"),
+  qrLogo: yup.mixed<File>().nullable(),
+  isLogoRemoved: yup.boolean(),
+});
+
+type FormData = yup.InferType<typeof schema>;
 
 export default function EditTableModal({
   isOpen,
   onClose,
   table,
   onEdit,
+  isPending = false,
 }: EditTableModalProps) {
-  const [newTableName, setNewTableName] = useState("");
-  const [newTableCapacity, setNewTableCapacity] = useState<number>(2);
-  const [qrLogo, setQrLogo] = useState<File | null>(null);
-  const [qrLogoPreview, setQrLogoPreview] = useState<string | null>(null);
-  const [isLogoRemoved, setIsLogoRemoved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: "",
+      qrLogo: null,
+      isLogoRemoved: false,
+    },
+  });
+
+  const qrLogo = watch("qrLogo");
+  const isLogoRemoved = watch("isLogoRemoved");
+
+  const qrLogoPreview = qrLogo
+    ? URL.createObjectURL(qrLogo)
+    : !isLogoRemoved && table?.qrLogo
+    ? `${config.serverOrigin}/${table.qrLogo}`
+    : null;
 
   useEffect(() => {
     if (table && isOpen) {
-      setNewTableName(table.name);
-      setNewTableCapacity(table.capacity);
-      setQrLogo(null);
-      setQrLogoPreview(table.qrLogoUrl || null);
-      setIsLogoRemoved(false);
+      reset({
+        name: table.name,
+        qrLogo: null,
+        isLogoRemoved: false,
+      });
     }
-  }, [table, isOpen]);
+  }, [table, isOpen, reset]);
 
   const handleClose = () => {
-    onClose();
-    setNewTableName("");
-    setNewTableCapacity(2);
-    setQrLogo(null);
-    setQrLogoPreview(null);
-    setIsLogoRemoved(false);
+    reset();
     if (fileInputRef.current) fileInputRef.current.value = "";
+    onClose();
   };
   
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setQrLogo(file);
-      setQrLogoPreview(URL.createObjectURL(file));
-      setIsLogoRemoved(false);
+      setValue("qrLogo", e.target.files[0]);
+      setValue("isLogoRemoved", false);
     }
   };
 
   const removeLogo = () => {
-    setQrLogo(null);
-    setQrLogoPreview(null);
-    setIsLogoRemoved(true);
+    setValue("qrLogo", null);
+    setValue("isLogoRemoved", true);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (data: FormData) => {
     if (table) {
-      onEdit(table.id, newTableName, newTableCapacity, qrLogo, isLogoRemoved);
-      handleClose();
+      onEdit(table.id, data.name, data.qrLogo, data.isLogoRemoved);
     }
   };
 
@@ -78,55 +97,55 @@ export default function EditTableModal({
       description="Update table details."
       size="md"
     >
-      <form id="edit-table-form" onSubmit={handleSubmit} className="space-y-5 mt-2">
+      <form id="edit-table-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-2">
         <div>
           <label htmlFor="editTableName" className="block text-sm font-medium text-gray-700 mb-1.5">
             Table Name or Number
           </label>
-          <input
-            type="text"
-            id="editTableName"
-            required
-            value={newTableName}
-            onChange={(e) => setNewTableName(e.target.value)}
-            placeholder="e.g. Table 5"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-cayenne-red-500 focus:ring-2 focus:ring-cayenne-red-100 outline-none transition-all"
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                type="text"
+                id="editTableName"
+                placeholder="e.g. Table 5"
+                className={`w-full px-4 py-2.5 rounded-xl border ${errors.name ? 'border-red-500' : 'border-gray-200'} focus:border-cayenne-red-500 focus:ring-2 focus:ring-cayenne-red-100 outline-none transition-all`}
+              />
+            )}
           />
-        </div>
-        <div>
-          <label htmlFor="editCapacity" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Seating Capacity
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Users className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="number"
-              id="editCapacity"
-              required
-              min="1"
-              max="100"
-              value={newTableCapacity}
-              onChange={(e) => setNewTableCapacity(parseInt(e.target.value) || 1)}
-              className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-cayenne-red-500 focus:ring-2 focus:ring-cayenne-red-100 outline-none transition-all"
-            />
-          </div>
+          {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             QR Code Logo (Optional)
           </label>
           {qrLogoPreview ? (
-            <div className="relative inline-block">
-              <img src={qrLogoPreview} alt="QR Logo Preview" className="h-24 w-24 object-contain rounded-xl border border-gray-200 p-2" />
-              <button
+            <div className="relative inline-block group">
+              <div className="relative h-28 w-28 rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+                <Image
+                  src={qrLogoPreview}
+                  alt="QR Logo Preview"
+                  fill
+                  className="object-contain p-2"
+                  unoptimized
+                />
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                >
+                  <span className="text-white text-xs font-medium">Change</span>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={removeLogo}
-                className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-200 text-gray-500 hover:text-red-500 transition-colors"
+                className="absolute -top-3 -right-3 flex !h-8 !w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all z-10 !p-0"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           ) : (
             <div
@@ -148,11 +167,11 @@ export default function EditTableModal({
       </form>
       
       <div className="mt-8 flex justify-end gap-3">
-        <Button variant="ghost" onClick={handleClose}>
+        <Button variant="ghost" onClick={handleClose} disabled={isPending}>
           Cancel
         </Button>
-        <Button type="submit" form="edit-table-form">
-          Save Changes
+        <Button type="submit" form="edit-table-form" disabled={isPending}>
+          {isPending ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </Modal>
