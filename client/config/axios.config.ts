@@ -19,9 +19,6 @@ export const fetchCsrfToken = async () => {
 };
 
 Fetch.interceptors.request.use((config) => {
-  console.log("URL:", config.url);
-  console.log("Base URL:", config.baseURL);
-  console.log("Headers:", config.headers);
 
   return config;
 });

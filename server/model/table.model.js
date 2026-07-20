@@ -13,11 +13,12 @@ const tableModel = sequelize.define("tables", {
     },
     tableToken: {
         type: DataTypes.STRING,
+        unique:true,
         allowNull: false
     },
-    capacity:{
-        type: DataTypes.INTEGER,
-        allowNull: false
+    qrLogo:{
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     timestamps: true,

@@ -8,6 +8,7 @@ interface DeleteTableModalProps {
   onClose: () => void;
   table: TableData | null;
   onDelete: (id: string) => void;
+  isPending?: boolean;
 }
 
 export default function DeleteTableModal({
@@ -15,6 +16,7 @@ export default function DeleteTableModal({
   onClose,
   table,
   onDelete,
+  isPending = false,
 }: DeleteTableModalProps) {
   return (
     <Modal
@@ -27,12 +29,12 @@ export default function DeleteTableModal({
         {`Are you sure you want to delete ${table?.name}? This action cannot be undone.`}
       </p>
       <div className="flex justify-end gap-3">
-        <Button variant="ghost" onClick={onClose}>
+        <Button variant="ghost" onClick={onClose} disabled={isPending}>
           Cancel
         </Button>
         <Button variant="danger" onClick={() => {
           if (table) onDelete(table.id);
-        }}>
+        }} isLoading={isPending}>
           Delete Table
         </Button>
       </div>

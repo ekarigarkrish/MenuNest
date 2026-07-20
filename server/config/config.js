@@ -9,6 +9,9 @@ export default {
     csrfSecretKey: process.env.CSRF_SECERT_KEY,
     secretKey: process.env.SECRET_KEY,
 
+    // allowed image Extensions
+    allowedImageExtensions: ['.jpeg', '.jpg', '.png', '.gif', '.webp', '.svg', '.avif', '.webp'],
+
     // Databse
     db_host: process.env.DB_HOST,
     db_name: process.env.DB_NAME,

@@ -35,10 +35,6 @@ export default function TableCard({
             <h3 className="font-semibold text-lg text-carbon-black-900">
               {table.name}
             </h3>
-            <div className="flex items-center text-sm text-gray-500 mt-0.5">
-              <Users className="w-4 h-4 mr-1.5" />
-              <span>{table.capacity} Seats</span>
-            </div>
           </div>
         </div>
       </div>
