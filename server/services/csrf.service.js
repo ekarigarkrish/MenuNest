@@ -1,13 +1,14 @@
 import { doubleCsrf } from "csrf-csrf"
 import config from "../config/config.js"
 
-const { generateToken, doubleCsrfProtection } = doubleCsrf({
+const { generateCsrfToken:generateToken, doubleCsrfProtection } = doubleCsrf({
 
     getSecret: () => config.csrfSecretKey,
-    cookieName: "x-csrf-token",
+    getSessionIdentifier: () => 'anonymous',
+    cookieName: "csrf-token",
     cookieOptions: {
         httpOnly: true, // MUST be true for security (protects the hash)
-        sameSite: config.isDEV ? "none" : "lax",
+        sameSite: config.isDEV ? "lax" : "none",
         secure: !config.isDEV
     },
 

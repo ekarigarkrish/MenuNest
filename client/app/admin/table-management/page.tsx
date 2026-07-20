@@ -49,7 +49,7 @@ export default function AdminTableMangementPage() {
       formdata.append('name', data.name);
       if (data.qrLogo) formdata.append('qrLogo', data.qrLogo);
 
-      const res = await Fetch.post('/api/table/tb-qrcode', formdata, { withCredentials: true })
+      const res = await Fetch.post('/api/table/tb-qrcode', formdata, { withCredentials: true, withXSRFToken: true })
       return res.data;
     },
     onSuccess: (data: any) => {
@@ -71,7 +71,7 @@ export default function AdminTableMangementPage() {
       formdata.append('names', JSON.stringify(data.names));
       if (data.qrLogo) formdata.append('qrLogo', data.qrLogo);
 
-      const res = await Fetch.post('/api/table/bulk-create', formdata, { withCredentials: true })
+      const res = await Fetch.post('/api/table/bulk-create', formdata, { withCredentials: true, withXSRFToken: true })
       return res.data;
     },
     onSuccess: (data: any) => {
@@ -101,7 +101,7 @@ export default function AdminTableMangementPage() {
         formdata.append('qrLogo', data.qrLogo);
       }
 
-      const res = await Fetch.put(`/api/table/tb-qrcode/${data.id}`, formdata, { withCredentials: true });
+      const res = await Fetch.put(`/api/table/tb-qrcode/${data.id}`, formdata, { withCredentials: true, withXSRFToken: true });
       return res.data;
     },
     onSuccess: (data: any) => {
@@ -142,7 +142,7 @@ export default function AdminTableMangementPage() {
 
   const deleteTableMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await Fetch.delete(`/api/table/tb-qrcode/${id}`, { withCredentials: true });
+      const res = await Fetch.delete(`/api/table/tb-qrcode/${id}`, { withCredentials: true, withXSRFToken: true });
       return res.data;
     },
     onSuccess: (data: any, id: string) => {
