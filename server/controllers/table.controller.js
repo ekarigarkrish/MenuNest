@@ -147,6 +147,8 @@ export default {
             if (table.qrLogo) {
                 try {
                     const logoPath = path.join(__dirname, '..', table.qrLogo);
+                    console.log(logoPath);
+                    
                     if (fs.existsSync(logoPath)) {
                         const canvas = createCanvas(400, 400);
                         const ctx = canvas.getContext('2d');

@@ -1,3 +1,4 @@
+import { DataTypes } from "sequelize";
 import sequelize from "../config/db.config.js";
 
 const menuItemModel = sequelize.define("menuItems", {
@@ -10,9 +11,24 @@ const menuItemModel = sequelize.define("menuItems", {
         type: DataTypes.STRING,
         allowNull: false
     },
+    slug: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
     description: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    discount: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+        defaultValue: 0
+    },
+    discountPrice:{
+        type: DataTypes.FLOAT,
+        allowNull: false,
+        defaultValue: 0
     },
     price: {
         type: DataTypes.FLOAT,
@@ -22,16 +38,24 @@ const menuItemModel = sequelize.define("menuItems", {
         type: DataTypes.STRING,
         allowNull: true
     },
+    categoryId: {
+        type: DataTypes.UUID,
+        allowNull: false
+    },
+    preparationTime: {
+        type: DataTypes.INTEGER
+    },
     isVeg: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
     },
-    categoryId: {
-        type: DataTypes.UUID,
-        allowNull: false
+    isFeatured:{
+        type:DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     },
-    isVisible: {
+    isAvailable: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true

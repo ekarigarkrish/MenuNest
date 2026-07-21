@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plus, LayoutGrid, Layers } from "lucide-react";
 import Button from "../../../components/ui/Button";
 import Section from "../../../components/ui/Section";
@@ -15,7 +15,6 @@ import EditTableModal from "./_components/EditTableModal";
 import QrCodeModal from "./_components/QrCodeModal";
 import DeleteTableModal from "./_components/DeleteTableModal";
 import { Fetch } from "@/config/axios.config";
-
 export interface TableData {
   id: string;
   name: string;
@@ -55,7 +54,7 @@ export default function AdminTableMangementPage() {
     onSuccess: (data: any) => {
       queryClient.setQueryData(['tables'], (old: TableData[] = []) => [
         ...old,
-        { id: data.table?.id, name: data.table?.name, tableToken: data.table?.tableToken }
+        { id: data.table?.id, name: data.table?.name, tableToken: data.table?.tableToken, qrLogo: `${data.table?.qrLogo}` }
       ]);
       setIsAddModalOpen(false);
       toast.success(data.message || "Table added successfully");
@@ -94,12 +93,8 @@ export default function AdminTableMangementPage() {
     mutationFn: async (data: { id: string; name: string; qrLogo?: File | null; removeLogo?: boolean }) => {
       const formdata = new FormData();
       formdata.append('name', data.name);
-      if (data.removeLogo) {
-        formdata.append('removeLogo', 'true');
-      }
-      if (data.qrLogo) {
-        formdata.append('qrLogo', data.qrLogo);
-      }
+      if (data.removeLogo) formdata.append('removeLogo', 'true');
+      if (data.qrLogo) formdata.append('qrLogo', data.qrLogo);
 
       const res = await Fetch.put(`/api/table/tb-qrcode/${data.id}`, formdata, { withCredentials: true, withXSRFToken: true });
       return res.data;
@@ -127,9 +122,7 @@ export default function AdminTableMangementPage() {
     let maxNumber = 0;
     tables.forEach(t => {
       const match = t.name.match(/\d+/);
-      if (match) {
-        maxNumber = Math.max(maxNumber, parseInt(match[0]));
-      }
+      if (match) maxNumber = Math.max(maxNumber, parseInt(match[0]));
     });
 
     const names = Array.from({ length: count }).map((_, i) => `Table ${maxNumber + i + 1}`);
