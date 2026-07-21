@@ -24,12 +24,7 @@ const schema = yup.object().shape({
 
 type FormData = yup.InferType<typeof schema>;
 
-export default function BulkAddTableModal({
-  isOpen,
-  onClose,
-  onAdd,
-  isPending = false,
-}: BulkAddTableModalProps) {
+export default function BulkAddTableModal({ isOpen, onClose, onAdd, isPending = false }: BulkAddTableModalProps) {
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -78,7 +73,7 @@ export default function BulkAddTableModal({
                   id="count"
                   min="1"
                   max="100"
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
                   className={`w-full pl-11 pr-4 py-2.5 rounded-xl border ${errors.count ? 'border-red-500' : 'border-gray-200'} focus:border-cayenne-red-500 focus:ring-2 focus:ring-cayenne-red-100 outline-none transition-all`}
                 />
               )}
@@ -87,7 +82,7 @@ export default function BulkAddTableModal({
           {errors.count && <p className="mt-1 text-sm text-red-500">{errors.count.message}</p>}
         </div>
       </form>
-      
+
       <div className="mt-8 flex justify-end gap-3">
         <Button variant="ghost" onClick={handleClose} disabled={isPending}>
           Cancel

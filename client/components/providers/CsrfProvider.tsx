@@ -11,9 +11,10 @@ export default function CsrfProvider({ children }: { children: React.ReactNode }
     fetched.current = true;
 
     const hasCsrfToken = document.cookie.includes("csrf-token=") || document.cookie.includes("x-csrf-token=");
+    // console.log(hasCsrfToken);
 
     if (!hasCsrfToken) {
-      Fetch.get("/api/auth/get/csrf-token").catch((err) => {
+      Fetch.get("/api/auth/get/csrf-token", { withCredentials: true, withXSRFToken: true }).catch((err) => {
         console.error("Failed to fetch CSRF token:", err);
       });
     }

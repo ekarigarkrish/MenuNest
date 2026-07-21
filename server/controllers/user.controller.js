@@ -37,6 +37,12 @@ export default {
       sameSite: config.isDEV ? 'lax' : 'none',
     })
 
+    res.clearCookie("csrf-token", {
+      httpOnly: true,
+      secure: !config.isDEV,
+      sameSite: config.isDEV ? 'lax' : 'none',
+    })
+
     return res.status(200).json({
       success: true,
       message: "Logout success"

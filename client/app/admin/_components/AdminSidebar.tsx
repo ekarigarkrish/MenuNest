@@ -45,7 +45,7 @@ export default function AdminSidebar() {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
-      await Fetch.post('/api/auth/logout');
+      await Fetch.post('/api/auth/logout', {}, { withCredentials: true, withXSRFToken: true });
       router.push('/');
     } catch (error: any) {
       toast.error(error.response?.data?.message)
@@ -143,8 +143,8 @@ export default function AdminSidebar() {
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
                       className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${active
-                          ? "text-cayenne-red-600 font-semibold"
-                          : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
+                        ? "text-cayenne-red-600 font-semibold"
+                        : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
                         }`}
                     >
                       {active && (
@@ -236,8 +236,8 @@ export default function AdminSidebar() {
                 key={item.name}
                 href={item.href}
                 className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${active
-                    ? "text-cayenne-red-400 font-semibold"
-                    : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
+                  ? "text-cayenne-red-400 font-semibold"
+                  : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
                   }`}
               >
                 {active && (

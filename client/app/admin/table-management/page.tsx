@@ -28,7 +28,7 @@ export default function AdminTableMangementPage() {
   const { data: tables = [], isLoading } = useQuery<TableData[]>({
     queryKey: ['tables'],
     queryFn: async () => {
-      const res = await Fetch.get('/api/table/all/data', { withCredentials: true });
+      const res = await Fetch.get('/api/table/all/data', { withCredentials: true, withXSRFToken: true });
       return res.data.data;
     }
   });

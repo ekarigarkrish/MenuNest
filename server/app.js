@@ -7,7 +7,6 @@ import cors from 'cors'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import config from './config/config.js'
-import { generateToken, doubleCsrfProtection } from './services/csrf.service.js'
 import helmet from 'helmet'
 import indexRoutes from './routes/index.route.js'
 
@@ -42,7 +41,7 @@ app.use(compression(
 app.use(cookieParser())
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
-app.use('/', doubleCsrfProtection, indexRoutes)
+app.use('/', indexRoutes)
 
 // error handler
 app.use(globalErrorHandler)
