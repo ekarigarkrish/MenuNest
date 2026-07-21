@@ -34,7 +34,7 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
     mode: "onTouched",
@@ -50,8 +50,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const res = await Fetch.post('/api/auth/login', data)
-      if(!res?.data?.success) return toast.error(res.data?.message)
+      const res = await Fetch.post('/api/auth/login', data, {withCredentials:true})
+      if (!res?.data?.success) return toast.error(res.data?.message)
 
       toast.success(res?.data?.message)
       switch (res.data.role) {
@@ -63,7 +63,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           break;
       }
       onClose();
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || "An error occurred during login")
     }
   }
@@ -103,11 +103,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               id="email"
               type="email"
               {...register("email")}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-carbon-black-800 border rounded-xl outline-none transition-all duration-300 ${
-                errors.email 
-                  ? "border-red-500 focus:ring-4 focus:ring-red-500/20" 
-                  : "border-gray-200 dark:border-carbon-black-700 focus:border-cayenne-red-500 focus:ring-4 focus:ring-cayenne-red-500/15 hover:border-gray-300 dark:hover:border-carbon-black-600"
-              } text-gray-900 dark:text-white placeholder:text-gray-400`}
+              className={`w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-carbon-black-800 border rounded-xl outline-none transition-all duration-300 ${errors.email
+                ? "border-red-500 focus:ring-4 focus:ring-red-500/20"
+                : "border-gray-200 dark:border-carbon-black-700 focus:border-cayenne-red-500 focus:ring-4 focus:ring-cayenne-red-500/15 hover:border-gray-300 dark:hover:border-carbon-black-600"
+                } text-gray-900 dark:text-white placeholder:text-gray-400`}
               placeholder="admin@menunest.com"
             />
           </div>
@@ -135,11 +134,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               id="password"
               type={showPassword ? "text" : "password"}
               {...register("password")}
-              className={`w-full pl-11 pr-12 py-3 bg-gray-50 dark:bg-carbon-black-800 border rounded-xl outline-none transition-all duration-300 ${
-                errors.password 
-                  ? "border-red-500 focus:ring-4 focus:ring-red-500/20" 
-                  : "border-gray-200 dark:border-carbon-black-700 focus:border-cayenne-red-500 focus:ring-4 focus:ring-cayenne-red-500/15 hover:border-gray-300 dark:hover:border-carbon-black-600"
-              } text-gray-900 dark:text-white placeholder:text-gray-400`}
+              className={`w-full pl-11 pr-12 py-3 bg-gray-50 dark:bg-carbon-black-800 border rounded-xl outline-none transition-all duration-300 ${errors.password
+                ? "border-red-500 focus:ring-4 focus:ring-red-500/20"
+                : "border-gray-200 dark:border-carbon-black-700 focus:border-cayenne-red-500 focus:ring-4 focus:ring-cayenne-red-500/15 hover:border-gray-300 dark:hover:border-carbon-black-600"
+                } text-gray-900 dark:text-white placeholder:text-gray-400`}
               placeholder="••••••••"
             />
             <button
