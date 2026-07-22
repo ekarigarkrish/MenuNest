@@ -80,6 +80,45 @@ export default {
         });
     }, 'getAllCategories'),
 
+    getAllCategoriesPublic: asyncHandler(async (req, res) => {
+
+        const { count, rows } = await categoryModel.findAndCountAll({
+            order: [["createdAt", "ASC"]],
+            raw: true,
+            attributes: {
+                include: [
+                    [fn("COUNT", col("menuItems.id")), "count"],
+                ],
+            },
+            include: [
+                {
+                    model: menuItemModel,
+                    as: "menuItems",
+                    attributes: [],
+                    required: false,
+                },
+            ],
+            group: ["categories.id"],
+            subQuery: false,
+        });
+
+        const categoriesWithUrl = rows.map((cat) => ({
+            ...cat,
+            image: cat.image
+                ? `${req.protocol}://${req.get("host")}/${cat.image}`
+                : null,
+        }));
+        const itemTotal = categoriesWithUrl.reduce((acc, cat) => acc + cat.count, 0)
+
+        return res.status(200).json({
+            success: true,
+            message: "Categories fetched successfully",
+            categories: categoriesWithUrl,
+            total: count,
+            itemTotal
+        });
+    }, 'getAllCategoriesPublic'),
+
     getSingleCategoryDetail: asyncHandler(async (req, res) => {
         const { id } = req.params;
 

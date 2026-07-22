@@ -95,16 +95,13 @@ export default function CustomerManagementPage() {
                     <Button variant="outline" leftIcon={<Download size={18} />}>
                         Export
                     </Button>
-                    <Button variant="primary" leftIcon={<UserPlus size={18} />}>
-                        Add Customer
-                    </Button>
                 </div>
             </div>
 
             {/* Filters and Search */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div className="flex space-x-1 bg-gray-50/80 p-1 rounded-lg border border-gray-100 w-full sm:w-auto overflow-x-auto hide-scrollbar">
-                    {["All", "Active", "New", "VIP"].map((tab) => (
+                    {["All", "Active", "New"].map((tab) => (
                         <Button
                         variant="ghost"
                             key={tab}
@@ -181,14 +178,8 @@ export default function CustomerManagementPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-1 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-cayenne-red-600 hover:bg-cayenne-red-50 !h-8 !w-8 rounded-md">
-                                                    <Edit size={16} />
-                                                </Button>
                                                 <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-600 hover:bg-red-50 !h-8 !w-8 rounded-md">
                                                     <Trash2 size={16} />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 !h-8 !w-8 rounded-md">
-                                                    <MoreVertical size={16} />
                                                 </Button>
                                             </div>
                                         </td>

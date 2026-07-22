@@ -27,7 +27,7 @@ export default function AdminMenuManagementPage() {
     const [activeCategoryId, setActiveCategoryId] = useState<string>("");
     const [categorySearch, setCategorySearch] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [isSidebarToggled, setIsSidebarToggled] = useState(false);
 
     const deferredCategorySearch = useDeferredValue(categorySearch);
     const deferredFoodSearch = useDeferredValue(searchQuery);
@@ -47,8 +47,8 @@ export default function AdminMenuManagementPage() {
     const resolvedActiveCategoryId = activeCategoryId || (categories.length > 0 ? categories[0].id : "");
     const activeCategory = categories.find((c) => c.id === resolvedActiveCategoryId);
 
-    const { 
-        activeCategoryFoods, 
+    const {
+        activeCategoryFoods,
         deleteFoodMutation,
         isFetchingNextPage: isFetchingNextMenuItemPage,
         hasNextPage: hasNextMenuItemPage,
@@ -119,10 +119,10 @@ export default function AdminMenuManagementPage() {
     return (
         <Section className="flex h-full min-h-[calc(100vh-64px)] rounded-2xl overflow-hidden my-6 sm:my-0 w-full bg-white border border-gray-200 shadow-sm relative">
             {/* Mobile Backdrop */}
-            {isMobileSidebarOpen && (
+            {isSidebarToggled && (
                 <div
-                    className="absolute inset-0 bg-gray-900/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
-                    onClick={() => setIsMobileSidebarOpen(false)}
+                    className="absolute inset-0 bg-gray-900/50 z-40 xl:hidden backdrop-blur-sm transition-opacity"
+                    onClick={() => setIsSidebarToggled(false)}
                 />
             )}
 
@@ -136,8 +136,8 @@ export default function AdminMenuManagementPage() {
                     const cat = categories.find((c) => c.id === id) ?? null;
                     setCategoryToDelete(cat);
                 }}
-                isOpen={isMobileSidebarOpen}
-                onClose={() => setIsMobileSidebarOpen(false)}
+                isToggled={isSidebarToggled}
+                onClose={() => setIsSidebarToggled(false)}
                 isLoading={isCategoriesLoading}
                 isFetchingNextPage={isFetchingNextPage}
                 hasNextPage={!!hasNextPage}
@@ -154,7 +154,7 @@ export default function AdminMenuManagementPage() {
                 onAddFood={handleAddFood}
                 onEditFood={handleEditFood}
                 onDeleteFood={(food) => setFoodToDelete(food)}
-                onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+                onToggleSidebar={() => setIsSidebarToggled(!isSidebarToggled)}
                 isFetchingNextPage={isFetchingNextMenuItemPage}
                 hasNextPage={!!hasNextMenuItemPage}
                 fetchNextPage={fetchNextMenuItemPage}

@@ -27,7 +27,7 @@ const navItems = [
   { name: "Table Management", href: "/admin/table-management", icon: Grid3x3 },
   { name: "Orders", href: "/admin/order-management", icon: ClipboardList },
   { name: "Customers", href: "/admin/customers", icon: Users },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
+  { name: "Settings", href: "/admin/settings/profile", icon: Settings },
 ];
 
 export default function AdminSidebar() {

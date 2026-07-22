@@ -3,6 +3,7 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import CsrfProvider from "@/components/providers/CsrfProvider";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,9 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} h-full antialiased scroll-smooth`} data-scroll-behavior="smooth">
       <body className="min-h-full flex flex-col font-sans">
-        <CsrfProvider>
-          {children}
-        </CsrfProvider>
+        <QueryProvider>
+          <CsrfProvider>
+            {children}
+          </CsrfProvider>
+        </QueryProvider>
+
         <Toaster position="top-right" richColors
           toastOptions={{
             style: {

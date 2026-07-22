@@ -14,9 +14,9 @@ router.use('/api/auth', authRoutes)
 router.use('/api/table', doubleCsrfProtection, isAuthenticated('admin'), tableRoutes)
 
 // MenuItems Category Routes
-router.use('/api/category', doubleCsrfProtection, isAuthenticated('admin'), categoryRoutes)
+router.use('/api/category', doubleCsrfProtection, categoryRoutes)
 
 // MenuItems Routes
-router.use('/api/menu', doubleCsrfProtection, isAuthenticated('admin'), menuItemsRoutes)
+router.use('/api/menu', doubleCsrfProtection, menuItemsRoutes)
 
 export default router

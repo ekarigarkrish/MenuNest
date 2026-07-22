@@ -17,7 +17,7 @@ interface CategorySidebarProps {
   onAddCategory: () => void;
   onEditCategory: (cat: CategoryData) => void;
   onDeleteCategory: (id: string) => void;
-  isOpen?: boolean;
+  isToggled?: boolean;
   onClose?: () => void;
   isLoading?: boolean;
   // Infinite scroll
@@ -57,7 +57,7 @@ export default React.memo(function CategorySidebar({
   onAddCategory,
   onEditCategory,
   onDeleteCategory,
-  isOpen = false,
+  isToggled = false,
   onClose = () => { },
   isLoading = false,
   isFetchingNextPage = false,
@@ -88,10 +88,12 @@ export default React.memo(function CategorySidebar({
   return (
     <div
       className={`
-                absolute lg:relative z-50 lg:z-10 h-full w-80 flex-shrink-0
+                absolute xl:relative z-50 xl:z-10 h-full w-[85vw] sm:w-80 flex-shrink-0
                 bg-gray-50 rounded-2xl flex flex-col
-                transition-transform duration-300 ease-in-out left-0 top-0 bottom-0
-                ${isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0 lg:shadow-none"}
+                transition-all duration-300 ease-in-out left-0 top-0 bottom-0
+                ${isToggled 
+                    ? "translate-x-0 shadow-2xl xl:-translate-x-full xl:-ml-80 xl:shadow-none" 
+                    : "-translate-x-full xl:translate-x-0 xl:ml-0 xl:shadow-none"}
             `}
     >
       {/* ── Header ────────────────────────────────────────────────────── */}
@@ -115,7 +117,7 @@ export default React.memo(function CategorySidebar({
               size="icon"
               variant="ghost"
               onClick={onClose}
-              className="h-8 w-8 rounded-full lg:hidden bg-white border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors shadow-sm"
+              className="h-8 w-8 rounded-full xl:hidden bg-white border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors shadow-sm"
               title="Close"
             >
               <X className="w-4 h-4" />
@@ -136,13 +138,15 @@ export default React.memo(function CategorySidebar({
                                    transition-all text-gray-900 placeholder:text-gray-400 shadow-sm outline-none"
           />
           {searchValue && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onSearchChange?.("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 !w-6 !h-6 !p-0 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all focus:outline-none focus:ring-2 focus:ring-gray-300"
               title="Clear search"
             >
               <X className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -169,7 +173,7 @@ export default React.memo(function CategorySidebar({
                   }}
                   whileHover={{ scale: 0.99 }}
                   whileTap={{ scale: 0.97 }}
-                  className={`w-full text-left flex items-center justify-between p-3.5 rounded-xl
+                  className={`w-full text-left flex items-center justify-between p-3.5 my-1 rounded-xl
                                         transition-all duration-200 border cursor-pointer group
                                         ${isActive
                       ? "bg-white border-cayenne-red-200 shadow-sm ring-1 ring-cayenne-red-500 text-gray-900"

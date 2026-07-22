@@ -6,8 +6,8 @@ import { Op } from "sequelize";
 
 export default {
     getAllMenuItems: asyncHandler(async (req, res) => {
-        const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         const search = (req.query.search || "").trim();
         const categoryId = req.query.category; // Optional filter by category
         const offset = (page - 1) * limit;
@@ -29,15 +29,15 @@ export default {
                 model: categoryModel,
                 as: "category",
                 attributes: ["id", "name"]
-            }]
+            }],
+            raw: true
         });
 
         const itemsWithUrl = rows.map((item) => {
-            const plainItem = item.get({ plain: true });
-            if (plainItem.image) {
-                plainItem.image = `${req.protocol}://${req.get("host")}/${plainItem.image}`;
+            if (item.image) {
+                item.image = `${req.protocol}://${req.get("host")}/${item.image}`;
             }
-            return plainItem;
+            return item;
         });
 
         return res.status(200).json({
@@ -51,11 +51,58 @@ export default {
         });
     }, 'getAllMenuItems'),
 
+    getPublicAllMenuItems: asyncHandler(async (req, res) => {
+        let { search, categoryId, isVeg, page, limit } = req.query;
+
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const whereClause = {};
+        if (search) {
+            whereClause.name = { [Op.like]: `%${search}%` };
+        }
+        if (categoryId) {
+            whereClause.categoryId = categoryId;
+        }
+        if (isVeg) {
+            whereClause.isVeg = isVeg === 'true';
+        }
+
+        const { count, rows } = await menuItemModel.findAndCountAll({
+            where: whereClause,
+            limit,
+            offset,
+            order: [["createdAt", "DESC"]],
+            include: [{
+                model: categoryModel,
+                as: "category",
+                attributes: ["id", "name"]
+            }],
+            raw: true
+        });
+
+        const itemsWithUrl = rows.map((item) => {
+            if (item.image) {
+                item.image = `${req.protocol}://${req.get("host")}/${item.image}`;
+            }
+            return item;
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Menu items fetched successfully",
+            menuItems: itemsWithUrl,
+            total: count, page, limit,
+            hasMore: offset + rows.length < count,
+        });
+    }, 'getPublicAllMenuItems'),
+
     createMenuItem: asyncHandler(async (req, res) => {
-        const { 
-            name, slug, description, price, discount, 
-            discountPrice, categoryId, preparationTime, 
-            isVeg, isFeatured, isAvailable 
+        const {
+            name, slug, description, price, discount,
+            discountPrice, categoryId, preparationTime,
+            isVeg, isFeatured, isAvailable
         } = req.body;
 
         const isExist = await menuItemModel.findOne({ where: { slug } });
@@ -117,10 +164,10 @@ export default {
 
     updateMenuItem: asyncHandler(async (req, res) => {
         const { id } = req.params;
-        const { 
-            name, slug, description, price, discount, 
-            discountPrice, categoryId, preparationTime, 
-            isVeg, isFeatured, isAvailable, removeImage 
+        const {
+            name, slug, description, price, discount,
+            discountPrice, categoryId, preparationTime,
+            isVeg, isFeatured, isAvailable, removeImage
         } = req.body;
 
         const menuItem = await menuItemModel.findByPk(id);
@@ -174,7 +221,7 @@ export default {
             menuItem: updatedItem,
         });
     }, 'updateMenuItem'),
-    
+
     deleteMenuItem: asyncHandler(async (req, res) => {
         const { id } = req.params;
 

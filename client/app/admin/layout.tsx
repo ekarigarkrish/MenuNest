@@ -1,10 +1,8 @@
 import React from "react";
 import AdminSidebar from "@/app/admin/_components/AdminSidebar";
-import QueryProvider from "@/components/providers/QueryProvider";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
-        <QueryProvider>
             <div className="flex h-screen overflow-hidden bg-carbon-black-50">
                 <AdminSidebar />
                 
@@ -14,6 +12,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </main>
                 </div>
             </div>
-        </QueryProvider>
     );
 }
