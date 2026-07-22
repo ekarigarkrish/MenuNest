@@ -9,14 +9,14 @@ import Section from "@/components/ui/Section";
 
 const SETTINGS_LINKS = [
   {
-    name: "Profile Settings",
-    href: "/admin/settings/profile",
-    icon: User,
-  },
-  {
     name: "General Settings",
     href: "/admin/settings/general",
     icon: Settings,
+  },
+  {
+    name: "Profile Settings",
+    href: "/admin/settings/profile",
+    icon: User,
   },
 ];
 
