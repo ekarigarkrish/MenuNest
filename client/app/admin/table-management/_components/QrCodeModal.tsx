@@ -105,11 +105,11 @@ export default function QrCodeModal({
     >
       {table && (
         <div className="flex flex-col items-center justify-center py-6">
-          <div className="w-56 h-56 bg-white border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center mb-6 relative overflow-hidden group">
+          <div className="w-56 h-72 bg-white border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center mb-6 relative overflow-hidden group">
             {isLoadingPreview ? (
               <div className="w-8 h-8 border-4 border-cayenne-red-500 border-t-transparent rounded-full animate-spin"></div>
             ) : qrPreviewUrl ? (
-              <Image width={224} height={224} src={qrPreviewUrl} alt={`QR Code for ${table.name}`} className="w-full h-full object-contain p-2" />
+              <Image width={224} height={288} src={qrPreviewUrl} alt={`QR Code for ${table.name}`} className="w-full h-full object-contain p-2" />
             ) : (
               <QrCode className="w-32 h-32 text-carbon-black-900 group-hover:scale-105 transition-transform duration-300" strokeWidth={1.5} />
             )}

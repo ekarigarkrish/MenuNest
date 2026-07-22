@@ -133,6 +133,7 @@ export default {
         const { id } = req.params;
         const table = await tableModel.findByPk(id, { raw: true });
         if (!table) throw ApiError('Not Found!', 404);
+        const tableName = table.name;
 
         const url = `${req.headers.origin}/menu?tableToken=${table.tableToken}`;
 
@@ -144,18 +145,22 @@ export default {
                 errorCorrectionLevel: 'H'
             });
 
+            const canvasWidth = 400;
+            const canvasHeight = 450;
+            const canvas = createCanvas(canvasWidth, canvasHeight);
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            const qrImage = await loadImage(qrBuffer);
+            ctx.drawImage(qrImage, 0, 0, 400, 400);
+
             if (table.qrLogo) {
                 try {
                     const logoPath = path.join(__dirname, '..', table.qrLogo);
-                    console.log(logoPath);
                     
                     if (fs.existsSync(logoPath)) {
-                        const canvas = createCanvas(400, 400);
-                        const ctx = canvas.getContext('2d');
-
-                        const qrImage = await loadImage(qrBuffer);
-                        ctx.drawImage(qrImage, 0, 0, 400, 400);
-
                         const logoImage = await loadImage(logoPath);
 
                         const logoSize = 400 * 0.25;
@@ -166,13 +171,20 @@ export default {
                         ctx.fillRect(x - 5, y - 5, logoSize + 10, logoSize + 10);
 
                         ctx.drawImage(logoImage, x, y, logoSize, logoSize);
-
-                        qrBuffer = canvas.toBuffer('image/png');
                     }
                 } catch (overlayError) {
                     console.error("Error overlaying logo on QR code:", overlayError);
                 }
             }
+
+            // Draw table name at the bottom
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(tableName, canvasWidth / 2, 425);
+
+            qrBuffer = canvas.toBuffer('image/png');
 
             res.setHeader('Content-Type', 'image/png');
             res.setHeader('Content-Disposition', `attachment; filename="table-${table.tableToken}-qr.png"`);
