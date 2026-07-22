@@ -5,6 +5,14 @@
   --foreground: #09090b;
 }
 
+html {
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -110,7 +118,6 @@
     100% { transform: translate(0px, 0px) scale(1); }
   }
 }
-
 
 body {
   background-color: var(--background);

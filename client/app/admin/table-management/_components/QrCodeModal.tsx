@@ -113,7 +113,6 @@ export default function QrCodeModal({
             ) : (
               <QrCode className="w-32 h-32 text-carbon-black-900 group-hover:scale-105 transition-transform duration-300" strokeWidth={1.5} />
             )}
-            <div className="absolute inset-0 bg-gradient-to-tr from-cayenne-red-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           </div>
           
           <div className="w-full bg-gray-50 rounded-xl p-4 border border-gray-100 text-center mb-6">

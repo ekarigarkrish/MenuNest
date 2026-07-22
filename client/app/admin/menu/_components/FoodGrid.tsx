@@ -27,7 +27,7 @@ interface FoodGridProps {
   onAddFood: () => void;
   onEditFood: (food: Food) => void;
   onDeleteFood: (food: Food) => void;
-  onOpenSidebar: () => void;
+  onToggleSidebar: () => void;
   isFetchingNextPage: boolean;
   hasNextPage: boolean;
   fetchNextPage: () => void;
@@ -41,7 +41,7 @@ export default React.memo(function FoodGrid({
   onAddFood,
   onEditFood,
   onDeleteFood,
-  onOpenSidebar,
+  onToggleSidebar,
   isFetchingNextPage,
   hasNextPage,
   fetchNextPage,
@@ -50,44 +50,44 @@ export default React.memo(function FoodGrid({
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative bg-white">
       {/* Header */}
-      <div className="px-4 sm:px-8 py-6 sm:py-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 relative z-10 border-b border-gray-100">
-        <div className="flex items-start sm:items-center gap-3">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 flex flex-col lg:flex-row lg:justify-between lg:items-end gap-5 lg:gap-6 relative z-10 border-b border-gray-100">
+        <div className="flex items-start gap-3 w-full lg:w-auto">
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden mt-1 sm:mt-0 -ml-2 text-gray-700 hover:bg-gray-100 rounded-md"
-            onClick={onOpenSidebar}
+            className=" mt-1 shrink-0 -ml-2 text-gray-700 hover:bg-gray-100 rounded-md"
+            onClick={onToggleSidebar}
           >
             <MenuIcon className="w-5 h-5" />
           </Button>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={activeCategory?.id}>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
-              {activeCategory?.name}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={activeCategory?.id} className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="truncate max-w-full">{activeCategory?.name}</span>
               {!activeCategory?.isVisible && (
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200 flex items-center gap-1.5 align-middle shadow-sm">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200 flex items-center gap-1.5 shrink-0 align-middle shadow-sm">
                   <EyeOff className="w-3 h-3" /> Hidden
                 </span>
               )}
             </h1>
-            <p className="text-sm text-gray-500 mt-2 font-medium">
+            <p className="text-sm text-gray-500 mt-2 font-medium leading-relaxed">
               Manage your menu items, pricing, and visibility in this category.
             </p>
           </motion.div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-          <div className="relative group w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0 mt-2 lg:mt-0">
+          <div className="relative group w-full sm:w-auto flex-1 sm:flex-none">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-cayenne-red-500 transition-colors" />
             <input
               type="text"
               placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-72 pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-4 focus:ring-cayenne-red-500/10 focus:border-cayenne-red-500 transition-all text-gray-900 placeholder:text-gray-400 shadow-sm outline-none"
+              className="w-full sm:w-64 md:w-72 pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-4 focus:ring-cayenne-red-500/10 focus:border-cayenne-red-500 transition-all text-gray-900 placeholder:text-gray-400 shadow-sm outline-none"
             />
           </div>
           <Button
-            className="w-full sm:w-auto rounded-xl shadow-md shadow-cayenne-red-500/20 hover:shadow-lg hover:shadow-cayenne-red-500/30 transition-all"
+            className="w-full sm:w-auto rounded-xl shadow-md shadow-cayenne-red-500/20 hover:shadow-lg hover:shadow-cayenne-red-500/30 transition-all shrink-0"
             leftIcon={<Plus className="w-4 h-4" />}
             onClick={onAddFood}
           >
@@ -118,7 +118,7 @@ export default React.memo(function FoodGrid({
         ) : (
           <motion.div
             layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 sm:gap-6"
           >
             <AnimatePresence>
               {activeCategoryFoods.map((food) => (
