@@ -1,85 +1,126 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useDeferredValue } from "react";
 import CategorySidebar from "./_components/CategorySidebar";
 import FoodGrid from "./_components/FoodGrid";
 import AddCategoryModal from "./_components/AddCategoryModal";
 import AddFoodModal from "./_components/AddFoodModal";
-import Modal from "../../../components/ui/Modal";
-import Button from "../../../components/ui/Button";
-import Section from "../../../components/ui/Section";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Section from "@/components/ui/Section";
+import { useCategories } from "./_hooks/useCategories";
+import { useMenuItems } from "./_hooks/useMenuItems";
 
-// Mock Data
-const MOCK_CATEGORIES = [
-    { id: "1", name: "Popular Dishes", isVisible: true, count: 12 },
-    { id: "2", name: "Starters & Appetizers", isVisible: true, count: 8 },
-    { id: "3", name: "Main Course", isVisible: true, count: 24 },
-    { id: "4", name: "Desserts & Sweets", isVisible: false, count: 5 },
-    { id: "5", name: "Beverages", isVisible: true, count: 15 },
-];
-
-const MOCK_FOODS = [
-    { id: "101", categoryId: "1", name: "Signature Garlic Bread", price: 6.99, isVeg: true, isVisible: true, description: "Freshly baked artisan bread with our secret garlic butter herb blend." },
-    { id: "102", categoryId: "1", name: "Spicy Buffalo Wings", price: 12.99, isVeg: false, isVisible: true, description: "Crispy chicken wings tossed in our house-made spicy buffalo sauce." },
-    { id: "103", categoryId: "3", name: "Grilled Atlantic Salmon", price: 24.99, isVeg: false, isVisible: true, description: "Pan-seared salmon served with asparagus and lemon butter sauce." },
-    { id: "104", categoryId: "3", name: "Truffle Mushroom Risotto", price: 18.99, isVeg: true, isVisible: true, description: "Creamy arborio rice with wild mushrooms and truffle oil." },
-    { id: "105", categoryId: "2", name: "Crispy Calamari", price: 14.99, isVeg: false, isVisible: false, description: "Lightly dusted calamari rings served with garlic aioli." },
-];
+export interface CategoryData {
+    id: string;
+    name: string;
+    slug: string;
+    desc?: string;
+    image?: string | null;
+    isVisible: boolean;
+    count?: number;
+    isAvailable: boolean
+}
 
 export default function AdminMenuManagementPage() {
-    const [categories, setCategories] = useState(MOCK_CATEGORIES);
-    const [foods, setFoods] = useState(MOCK_FOODS);
-    const [activeCategoryId, setActiveCategoryId] = useState<string>("1");
+    // ─── Local UI state ─────────────────────────────────────────────────────
+    const [activeCategoryId, setActiveCategoryId] = useState<string>("");
+    const [categorySearch, setCategorySearch] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-    // Modals state
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-    const [categoryModalData, setCategoryModalData] = useState<any>(null);
-    const [isFoodModalOpen, setIsFoodModalOpen] = useState(false);
-    
-    const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+    const deferredCategorySearch = useDeferredValue(categorySearch);
+    const deferredFoodSearch = useDeferredValue(searchQuery);
 
-    // Derived state
-    const activeCategory = categories.find((c) => c.id === activeCategoryId);
-    const activeCategoryFoods = foods.filter((f) =>
-        f.categoryId === activeCategoryId &&
-        f.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Modal state
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [categoryModalData, setCategoryModalData] = useState<CategoryData | null>(null);
+    const [isFoodModalOpen, setIsFoodModalOpen] = useState(false);
+    const [foodToEdit, setFoodToEdit] = useState<any | null>(null);
+    const [categoryToDelete, setCategoryToDelete] = useState<CategoryData | null>(null);
+    const [foodToDelete, setFoodToDelete] = useState<any | null>(null);
+
+    // ─── Custom Hooks for Data Fetching & Mutations ─────────────────────────
+    const { categories, isCategoriesLoading, isFetchingNextPage, fetchNextPage, hasNextPage, createCategoryMutation, updateCategoryMutation, deleteCategoryMutation } = useCategories(deferredCategorySearch);
+
+    // Auto-select first category when data loads
+    const resolvedActiveCategoryId = activeCategoryId || (categories.length > 0 ? categories[0].id : "");
+    const activeCategory = categories.find((c) => c.id === resolvedActiveCategoryId);
+
+    const { 
+        activeCategoryFoods, 
+        deleteFoodMutation,
+        isFetchingNextPage: isFetchingNextMenuItemPage,
+        hasNextPage: hasNextMenuItemPage,
+        fetchNextPage: fetchNextMenuItemPage
+    } = useMenuItems(resolvedActiveCategoryId, deferredFoodSearch);
+
+    // ─── Handlers ────────────────────────────────────────────────────────────
+    const handleCategorySearchChange = useCallback((value: string) => {
+        setCategorySearch(value);
+    }, []);
 
     const handleOpenAddCategory = () => {
         setCategoryModalData(null);
         setIsCategoryModalOpen(true);
     };
 
-    const handleOpenEditCategory = (cat: any) => {
+    const handleOpenEditCategory = (cat: CategoryData) => {
         setCategoryModalData(cat);
         setIsCategoryModalOpen(true);
     };
 
     const handleSaveCategory = (data: any) => {
         if (categoryModalData) {
-            setCategories(cats => cats.map(c => c.id === categoryModalData.id ? { ...c, ...data } : c));
+            updateCategoryMutation.mutate(
+                { id: categoryModalData.id, ...data },
+                { onSuccess: () => setIsCategoryModalOpen(false) }
+            );
         } else {
-            setCategories(cats => [...cats, { id: Math.random().toString(), count: 0, ...data }]);
+            createCategoryMutation.mutate(
+                data,
+                { onSuccess: () => setIsCategoryModalOpen(false) }
+            );
         }
     };
 
     const handleDeleteCategory = () => {
         if (!categoryToDelete) return;
-        setCategories(cats => cats.filter(c => c.id !== categoryToDelete));
-        if (activeCategoryId === categoryToDelete) {
-            const remaining = categories.filter(c => c.id !== categoryToDelete);
-            setActiveCategoryId(remaining.length > 0 ? remaining[0].id : "");
-        }
-        setCategoryToDelete(null);
+        deleteCategoryMutation.mutate(categoryToDelete.id, {
+            onSuccess: () => {
+                if (resolvedActiveCategoryId === categoryToDelete.id) {
+                    const remaining = categories.filter((c) => c.id !== categoryToDelete.id);
+                    setActiveCategoryId(remaining.length > 0 ? remaining[0].id : "");
+                }
+                setCategoryToDelete(null);
+            }
+        });
     };
+
+    const handleAddFood = () => {
+        setFoodToEdit(null);
+        setIsFoodModalOpen(true);
+    };
+
+    const handleEditFood = (food: any) => {
+        setFoodToEdit(food);
+        setIsFoodModalOpen(true);
+    };
+
+    const handleDeleteFood = () => {
+        if (!foodToDelete) return;
+        deleteFoodMutation.mutate(foodToDelete.id, {
+            onSuccess: () => setFoodToDelete(null)
+        });
+    };
+
+    const isCategoryMutationPending = createCategoryMutation.isPending || updateCategoryMutation.isPending;
 
     return (
         <Section className="flex h-full min-h-[calc(100vh-64px)] rounded-2xl overflow-hidden my-6 sm:my-0 w-full bg-white border border-gray-200 shadow-sm relative">
             {/* Mobile Backdrop */}
             {isMobileSidebarOpen && (
-                <div 
+                <div
                     className="absolute inset-0 bg-gray-900/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
                     onClick={() => setIsMobileSidebarOpen(false)}
                 />
@@ -87,13 +128,22 @@ export default function AdminMenuManagementPage() {
 
             <CategorySidebar
                 categories={categories}
-                activeCategoryId={activeCategoryId}
+                activeCategoryId={resolvedActiveCategoryId}
                 setActiveCategoryId={setActiveCategoryId}
                 onAddCategory={handleOpenAddCategory}
                 onEditCategory={handleOpenEditCategory}
-                onDeleteCategory={(id) => setCategoryToDelete(id)}
+                onDeleteCategory={(id) => {
+                    const cat = categories.find((c) => c.id === id) ?? null;
+                    setCategoryToDelete(cat);
+                }}
                 isOpen={isMobileSidebarOpen}
                 onClose={() => setIsMobileSidebarOpen(false)}
+                isLoading={isCategoriesLoading}
+                isFetchingNextPage={isFetchingNextPage}
+                hasNextPage={!!hasNextPage}
+                fetchNextPage={fetchNextPage}
+                searchValue={categorySearch}
+                onSearchChange={handleCategorySearchChange}
             />
 
             <FoodGrid
@@ -101,8 +151,13 @@ export default function AdminMenuManagementPage() {
                 activeCategoryFoods={activeCategoryFoods}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
-                onAddFood={() => setIsFoodModalOpen(true)}
+                onAddFood={handleAddFood}
+                onEditFood={handleEditFood}
+                onDeleteFood={(food) => setFoodToDelete(food)}
                 onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+                isFetchingNextPage={isFetchingNextMenuItemPage}
+                hasNextPage={!!hasNextMenuItemPage}
+                fetchNextPage={fetchNextMenuItemPage}
             />
 
             <AddCategoryModal
@@ -110,13 +165,52 @@ export default function AdminMenuManagementPage() {
                 onClose={() => setIsCategoryModalOpen(false)}
                 initialData={categoryModalData}
                 onSave={handleSaveCategory}
+                isPending={isCategoryMutationPending}
             />
 
             <AddFoodModal
+                activeCategoryId={activeCategoryId}
                 isOpen={isFoodModalOpen}
                 onClose={() => setIsFoodModalOpen(false)}
+                initialData={foodToEdit}
             />
-            
+
+            {/* Delete Food Confirmation Modal */}
+            <Modal
+                isOpen={!!foodToDelete}
+                onClose={() => setFoodToDelete(null)}
+                title="Delete Menu Item"
+                size="sm"
+                footer={
+                    <div className="flex gap-3 w-full sm:w-auto">
+                        <Button
+                            variant="outline"
+                            className="w-full sm:w-auto border-gray-200"
+                            onClick={() => setFoodToDelete(null)}
+                            disabled={deleteFoodMutation.isPending}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="danger"
+                            className="w-full sm:w-auto"
+                            onClick={handleDeleteFood}
+                            isLoading={deleteFoodMutation.isPending}
+                        >
+                            Delete
+                        </Button>
+                    </div>
+                }
+            >
+                <p className="text-sm text-gray-600 font-medium">
+                    Are you sure you want to delete{" "}
+                    <span className="font-bold text-gray-900">
+                        {foodToDelete?.name}
+                    </span>
+                    ? This action cannot be undone.
+                </p>
+            </Modal>
+
             {/* Delete Confirmation Modal */}
             <Modal
                 isOpen={!!categoryToDelete}
@@ -125,16 +219,43 @@ export default function AdminMenuManagementPage() {
                 size="sm"
                 footer={
                     <div className="flex gap-3 w-full sm:w-auto">
-                        <Button variant="outline" className="w-full sm:w-auto border-gray-200" onClick={() => setCategoryToDelete(null)}>Cancel</Button>
-                        <Button variant="danger" className="w-full sm:w-auto" onClick={handleDeleteCategory}>Delete</Button>
+                        <Button
+                            variant="outline"
+                            className="w-full sm:w-auto border-gray-200"
+                            onClick={() => setCategoryToDelete(null)}
+                            disabled={deleteCategoryMutation.isPending}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="danger"
+                            className="w-full sm:w-auto"
+                            disabled={categoryToDelete?.count ? categoryToDelete.count > 0 : false}
+                            onClick={handleDeleteCategory}
+                            isLoading={deleteCategoryMutation.isPending}
+                        >
+                            Delete
+                        </Button>
                     </div>
                 }
             >
-                <></>
-                <p className="text-sm text-gray-600 font-medium">
-                    Deleting this category will also remove all items associated with it from the menu.
-                </p>
+                {
+                    categoryToDelete?.count && categoryToDelete?.count > 0 ? (
+                        <p>
+                            You can't delete this category because it has {categoryToDelete?.count} menu items associated with it. Please move the menu items to another category and try again.
+                        </p>
+                    ) : (
+                        <p className="text-sm text-gray-600 font-medium">
+                            Are you sure you want to delete{" "}
+                            <span className="font-bold text-gray-900">
+                                {categoryToDelete?.name}
+                            </span>
+                            ? This will also remove all menu items associated with it.
+                        </p>
+                    )
+                }
             </Modal>
         </Section>
     );
 }
+

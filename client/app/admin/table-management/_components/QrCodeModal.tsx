@@ -5,6 +5,7 @@ import Button from "../../../../components/ui/Button";
 import { TableData } from "../page";
 import { Fetch } from "@/config/axios.config";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface QrCodeModalProps {
   isOpen: boolean;
@@ -71,7 +72,8 @@ export default function QrCodeModal({
 
       const response = await Fetch.get(`/api/table/tb-qrcode/${table.id}`, {
         responseType: 'blob',
-        withCredentials: true
+        withCredentials: true,
+        withXSRFToken:true
       });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -86,9 +88,8 @@ export default function QrCodeModal({
       window.URL.revokeObjectURL(url);
       
       toast.success("QR Code downloaded successfully");
-    } catch (error) {
-      console.error("Failed to download QR code", error);
-      toast.error("Failed to download QR code");
+    } catch (error:any) {
+      toast.error(error.response?.data?.message || "Failed to download QR code");
     } finally {
       setIsDownloading(false);
     }
@@ -108,7 +109,7 @@ export default function QrCodeModal({
             {isLoadingPreview ? (
               <div className="w-8 h-8 border-4 border-cayenne-red-500 border-t-transparent rounded-full animate-spin"></div>
             ) : qrPreviewUrl ? (
-              <img src={qrPreviewUrl} alt={`QR Code for ${table.name}`} className="w-full h-full object-contain p-2" />
+              <Image width={224} height={224} src={qrPreviewUrl} alt={`QR Code for ${table.name}`} className="w-full h-full object-contain p-2" />
             ) : (
               <QrCode className="w-32 h-32 text-carbon-black-900 group-hover:scale-105 transition-transform duration-300" strokeWidth={1.5} />
             )}

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Edit2, Trash2, EyeOff, Search, UtensilsCrossed, Image as ImageIcon, Menu as MenuIcon } from "lucide-react";
 import Button from "../../../../components/ui/Button";
@@ -11,41 +12,50 @@ interface Food {
   isVeg: boolean;
   isVisible: boolean;
   description: string;
+  image?: string | null;
+  discountPrice?: number | null,
+  isAvailable: boolean
 }
 
-interface Category {
-  id: string;
-  name: string;
-  isVisible: boolean;
-  count: number;
-}
+import { CategoryData } from "../page";
 
 interface FoodGridProps {
-  activeCategory: Category | undefined;
+  activeCategory: CategoryData | undefined;
   activeCategoryFoods: Food[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onAddFood: () => void;
+  onEditFood: (food: Food) => void;
+  onDeleteFood: (food: Food) => void;
   onOpenSidebar: () => void;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
 }
 
-export default function FoodGrid({
+export default React.memo(function FoodGrid({
   activeCategory,
   activeCategoryFoods,
   searchQuery,
   setSearchQuery,
   onAddFood,
+  onEditFood,
+  onDeleteFood,
   onOpenSidebar,
+  isFetchingNextPage,
+  hasNextPage,
+  fetchNextPage,
 }: FoodGridProps) {
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative bg-white">
       {/* Header */}
       <div className="px-4 sm:px-8 py-6 sm:py-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 relative z-10 border-b border-gray-100">
         <div className="flex items-start sm:items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="lg:hidden mt-1 sm:mt-0 -ml-2 text-gray-700 hover:bg-gray-100 rounded-md" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden mt-1 sm:mt-0 -ml-2 text-gray-700 hover:bg-gray-100 rounded-md"
             onClick={onOpenSidebar}
           >
             <MenuIcon className="w-5 h-5" />
@@ -64,34 +74,34 @@ export default function FoodGrid({
             </p>
           </motion.div>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           <div className="relative group w-full sm:w-auto">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-cayenne-red-500 transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search items..." 
+            <input
+              type="text"
+              placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full sm:w-72 pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-4 focus:ring-cayenne-red-500/10 focus:border-cayenne-red-500 transition-all text-gray-900 placeholder:text-gray-400 shadow-sm outline-none"
             />
           </div>
-          <Button 
-            className="w-full sm:w-auto rounded-xl shadow-md shadow-cayenne-red-500/20 hover:shadow-lg hover:shadow-cayenne-red-500/30 transition-all" 
-            leftIcon={<Plus className="w-4 h-4" />} 
+          <Button
+            className="w-full sm:w-auto rounded-xl shadow-md shadow-cayenne-red-500/20 hover:shadow-lg hover:shadow-cayenne-red-500/30 transition-all"
+            leftIcon={<Plus className="w-4 h-4" />}
             onClick={onAddFood}
           >
             Add Item
           </Button>
         </div>
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-8 py-8 z-10 custom-scrollbar bg-gray-50/30">
         {activeCategoryFoods.length === 0 ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }} 
-            animate={{ opacity: 1, scale: 1 }} 
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="flex flex-col items-center justify-center h-full min-h-[400px] text-center"
           >
             <div className="w-24 h-24 mb-6 rounded-full bg-cayenne-red-50 flex items-center justify-center border-4 border-white shadow-sm">
@@ -106,60 +116,78 @@ export default function FoodGrid({
             </Button>
           </motion.div>
         ) : (
-          <motion.div 
-            layout 
+          <motion.div
+            layout
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6"
           >
             <AnimatePresence>
               {activeCategoryFoods.map((food) => (
-                <motion.div 
+                <motion.div
                   layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  key={food.id} 
+                  key={food.id}
                   className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:border-gray-300 transition-all duration-300 flex flex-col"
                 >
                   <div className="h-48 bg-gray-100 relative overflow-hidden flex-shrink-0">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ImageIcon className="w-12 h-12 text-gray-300" />
-                    </div>
-                    
+                    {food.image ? (
+                      <Image
+                        src={food.image}
+                        alt={food.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ImageIcon className="w-12 h-12 text-gray-300" />
+                      </div>
+                    )}
+
                     <div className="absolute top-3 left-3 flex flex-col gap-2">
-                      <span className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg shadow-sm border ${
-                        food.isVeg 
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                          : 'bg-rose-50 text-rose-700 border-rose-200'
-                      }`}>
+                      <span className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg shadow-sm border ${food.isVeg
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                        }`}>
                         {food.isVeg ? 'Veg' : 'Non-Veg'}
                       </span>
                     </div>
 
-                    {!food.isVisible && (
+                    {!food.isAvailable && (
                       <div className="absolute top-3 right-3">
                         <span className="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg bg-gray-900 text-white shadow-sm flex items-center gap-1.5">
                           <EyeOff className="w-3 h-3" /> Hidden
                         </span>
                       </div>
                     )}
-                    
+
                     {/* Hover Actions */}
                     <div className="absolute inset-0 bg-gray-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                      <Button variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-cayenne-red-600 hover:bg-gray-50 shadow-lg">
+                      <Button onClick={() => onEditFood(food)} variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-cayenne-red-600 hover:bg-gray-50 shadow-lg">
                         <Edit2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-red-600 hover:bg-gray-50 shadow-lg">
+                      <Button onClick={() => onDeleteFood(food)} variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-red-600 hover:bg-gray-50 shadow-lg">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex justify-between items-start mb-2 gap-4">
-                      <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-cayenne-red-600 transition-colors line-clamp-1">
+                      <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-cayenne-red-400 transition-colors line-clamp-1">
                         {food.name}
                       </h3>
-                      <span className="font-extrabold text-lg text-gray-900">${food.price.toFixed(2)}</span>
+                      <div className="flex flex-col items-end">
+                        {food.discountPrice != null && food.discountPrice > 0 ? (
+                          <>
+                            <span className="font-extrabold text-lg text-gray-900">₹{food.discountPrice.toFixed(2)}</span>
+                            <span className="text-sm font-medium text-gray-400 line-through">₹{food.price?.toFixed(2)}</span>
+                          </>
+                        ) : (
+                          <span className="font-extrabold text-lg text-gray-900">₹{food.price.toFixed(2)}</span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed flex-1">
                       {food.description}
@@ -170,7 +198,20 @@ export default function FoodGrid({
             </AnimatePresence>
           </motion.div>
         )}
+        
+        {hasNextPage && (
+          <div className="flex justify-center mt-8 pb-8">
+            <Button 
+              onClick={() => fetchNextPage()} 
+              disabled={isFetchingNextPage}
+              variant="outline"
+              className="rounded-xl border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              {isFetchingNextPage ? "Loading more..." : "Load More Items"}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+})

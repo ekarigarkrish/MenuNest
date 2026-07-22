@@ -10,7 +10,7 @@ export default {
     secretKey: process.env.SECRET_KEY,
 
     // allowed image Extensions
-    allowedImageExtensions: ['.jpeg', '.jpg', '.png', '.gif', '.webp', '.svg', '.avif', '.webp'],
+    allowedImageExtensions: ['.jpeg', '.jpg', '.png'],
 
     // Databse
     db_host: process.env.DB_HOST,

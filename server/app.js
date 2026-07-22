@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import config from './config/config.js'
 import helmet from 'helmet'
+import './model/assoication.js'
 import indexRoutes from './routes/index.route.js'
 
 const __filename = fileURLToPath(import.meta.url)
