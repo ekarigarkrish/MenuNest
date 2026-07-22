@@ -8,6 +8,7 @@ import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import CartDrawer from "./_components/CartDrawer";
 import FoodCard from "./_components/FoodCard";
+import CustomerDetailsForm, { CustomerDetails } from "./_components/CustomerDetailsForm";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Fetch } from "@/config/axios.config";
 import Image from "next/image";
@@ -25,12 +26,27 @@ type FoodItem = {
     image: string;
 };
 
+const storage = {
+    setDetails: (details: any) => {
+        sessionStorage.setItem('details', JSON.stringify(details));
+    },
+    getDetails: () => {
+        const details = sessionStorage.getItem('details');
+        return details ? JSON.parse(details) : null;
+    },
+    removeDetails: () => {
+        sessionStorage.removeItem('details');
+    }
+}
+
 export default function Menu() {
-    
+
     const [activeCategory, setActiveCategory] = useState<string>("all");
     const [search, setSearch] = useState("");
     const [cart, setCart] = useState<any[]>([]);
     const [cartOpen, setCartOpen] = useState(false);
+    const [customerFormOpen, setCustomerFormOpen] = useState(false);
+    const [customer, setCustomer] = useState<CustomerDetails | null>(null);
     const [dietFilter, setDietFilter] = useState<"all" | "veg" | "non-veg">("all");
 
     const { data: categoriesResponse, isLoading: isCategoriesLoading } = useQuery({
@@ -43,13 +59,7 @@ export default function Menu() {
 
     const observerTarget = useRef<HTMLDivElement>(null);
 
-    const {
-        data: menuItemsResponse,
-        isLoading: isMenuItemsLoading,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage
-    } = useInfiniteQuery({
+    const { data: menuItemsResponse, isLoading: isMenuItemsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         queryKey: ["public-menu-items", activeCategory, search, dietFilter],
         queryFn: async ({ pageParam = 1 }) => {
             const params = new URLSearchParams();
@@ -58,7 +68,7 @@ export default function Menu() {
             if (activeCategory !== "all") params.append("categoryId", activeCategory);
             if (search) params.append("search", search);
             if (dietFilter !== "all") params.append("isVeg", dietFilter === "veg" ? "true" : "false");
-            
+
             const res = await Fetch.get(`/api/menu/public/all?${params.toString()}`);
             return res.data;
         },
@@ -69,7 +79,7 @@ export default function Menu() {
     const filteredItems: FoodItem[] = useMemo(() => {
         if (!menuItemsResponse?.pages) return [];
         const allItems = menuItemsResponse.pages.flatMap(page => page.menuItems || []);
-        
+
         return allItems.map((item: any) => ({
             id: item.id,
             name: item.name,
@@ -133,6 +143,12 @@ export default function Menu() {
     const handleRemove = (id: string) =>
         setCart((prev) => prev.filter((c) => c.id !== id));
 
+    useEffect(() => {
+        if (storage.getDetails()) {
+            setCustomer(storage.getDetails());
+        }
+    }, []);
+
     return (
         <>
             <AnimatePresence>
@@ -146,6 +162,16 @@ export default function Menu() {
                     />
                 )}
             </AnimatePresence>
+
+            <CustomerDetailsForm
+                isOpen={customerFormOpen}
+                onClose={() => setCustomerFormOpen(false)}
+                onSubmit={(details) => {
+                    setCustomer(details);
+                    storage.setDetails(details)
+                    setCartOpen(true);
+                }}
+            />
 
             <Section className="min-h-screen bg-gradient-to-b from-orange-50/60 via-white to-white">
                 <Container className="py-8 md:py-12">
@@ -167,7 +193,13 @@ export default function Menu() {
                         <Button
                             id="open-cart-btn"
                             variant="primary"
-                            onClick={() => setCartOpen(true)}
+                            onClick={() => {
+                                if (!customer) {
+                                    setCustomerFormOpen(true);
+                                } else {
+                                    setCartOpen(true);
+                                }
+                            }}
                             aria-label="Open cart"
                             className="fixed bottom-10 right-5 z-20 self-start sm:self-auto sm:relative !rounded-xl"
                         >
@@ -208,8 +240,8 @@ export default function Menu() {
                                         size="sm"
                                         onClick={() => setDietFilter(f)}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cayenne-red-500 ${isActive
-                                                ? "bg-white text-carbon-black-900 shadow-sm ring-1 ring-black/5"
-                                                : "text-carbon-black-500 hover:text-carbon-black-900 hover:bg-carbon-black-100/50"
+                                            ? "bg-white text-carbon-black-900 shadow-sm ring-1 ring-black/5"
+                                            : "text-carbon-black-500 hover:text-carbon-black-900 hover:bg-carbon-black-100/50"
                                             }`}
                                     >
                                         {f === "veg" && <Leaf className={`w-3.5 h-3.5 ${isActive ? "text-green-600" : ""}`} />}
@@ -231,7 +263,7 @@ export default function Menu() {
                             </div>
                         ) : categories.map((cat) => {
                             const isActive = activeCategory === cat.id;
-                            
+
                             return (
                                 <Button
                                     key={cat.id}

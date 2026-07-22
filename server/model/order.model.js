@@ -15,6 +15,10 @@ const orderModel = sequelize.define("orders", {
         type: DataTypes.ENUM('pending', 'accepted', 'preparing', 'ready', 'served', 'cancelled', 'completed'),
         allowNull: false,
         defaultValue: 'pending'
+    },
+    order:{
+        type :DataTypes.JSONB,
+        allowNull: false
     }
 }, {
     timestamps: true,
