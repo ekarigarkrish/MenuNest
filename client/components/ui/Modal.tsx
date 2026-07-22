@@ -20,6 +20,7 @@ export interface ModalProps {
   footer?: React.ReactNode;
   className?: string;
   overlayClassName?: string;
+  contentClassName?:string
 }
 
 export default function Modal({
@@ -34,6 +35,7 @@ export default function Modal({
   showCloseButton = true,
   footer,
   className = "",
+  contentClassName = '',
   overlayClassName = "",
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
@@ -225,7 +227,7 @@ export default function Modal({
             )}
 
             {/* Scrollable Content Body */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 text-gray-600">
+            <div className={`flex-1 overflow-y-auto px-6 py-5 text-gray-600 ${contentClassName}`}>
               {children}
             </div>
 

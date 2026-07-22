@@ -3,7 +3,8 @@ import Image from "next/image";
 import { ShoppingCart, X, Plus, Minus, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
-import { CartItem } from "../types";
+// import { CartItem } from "../types";
+
 
 export default function CartDrawer({
     cart,
@@ -12,7 +13,7 @@ export default function CartDrawer({
     onDecrease,
     onRemove,
 }: {
-    cart: CartItem[];
+    cart: any[];
     onClose: () => void;
     onIncrease: (id: string) => void;
     onDecrease: (id: string) => void;
