@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { ChevronRight, ArrowLeft, Phone, User } from "lucide-react";
+import { ChevronRight, ArrowLeft, Phone, User, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import { Fetch } from "@/config/axios.config";
 
 export type CustomerDetails = {
     phone: string;
@@ -23,6 +24,7 @@ export default function CustomerDetailsForm({
     const [phone, setPhone] = useState("+91");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     // Reset form when opened
     React.useEffect(() => {
@@ -31,9 +33,27 @@ export default function CustomerDetailsForm({
         }
     }, [isOpen]);
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (step === 1 && phone.length >= 13) {
-           setStep(2);
+            try {
+                setIsLoading(true);
+                const res = await Fetch.post('/api/customer/check', { phone }, { withCredentials: true, withXSRFToken: true });
+                if (res.data.success && res.data.exists) {
+                    onSubmit({ 
+                        phone: res.data.customer.phone, 
+                        firstName: res.data.customer.firstName, 
+                        lastName: res.data.customer.lastName 
+                    });
+                    onClose();
+                } else {
+                    setStep(2);
+                }
+            } catch (error) {
+                console.error("Failed to check customer", error);
+                setStep(2); // fallback to asking name
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -88,11 +108,11 @@ export default function CustomerDetailsForm({
                             variant="primary"
                             size="lg"
                             onClick={handleNext}
-                            disabled={phone.length < 13}
+                            disabled={phone.length < 13 || isLoading}
                             className="w-full mt-4"
-                            rightIcon={<ChevronRight className="w-4 h-4" />}
+                            rightIcon={isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
                         >
-                            Continue
+                            {isLoading ? "Checking..." : "Continue"}
                         </Button>
                     </motion.div>
                 ) : (

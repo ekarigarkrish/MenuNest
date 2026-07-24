@@ -3,25 +3,31 @@ import Image from "next/image";
 import { ShoppingCart, X, Plus, Minus, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
-// import { CartItem } from "../types";
-
+import { useSocket } from "@/hooks/useSocket";
+import { useSearchParams } from "next/navigation";
 
 export default function CartDrawer({
+    storage,
     cart,
     onClose,
     onIncrease,
     onDecrease,
     onRemove,
 }: {
+    storage:any,
     cart: any[];
     onClose: () => void;
     onIncrease: (id: string) => void;
     onDecrease: (id: string) => void;
     onRemove: (id: string) => void;
 }) {
+    const searchParams = useSearchParams();
+    const tableToken = searchParams.get("tableToken");
+    const { socket } = useSocket()
     const subtotal = cart.reduce((acc, i) => acc + i.discountPrice * i.qty, 0);
-    const tax = Math.round(subtotal * 0.10);
-    const total = subtotal + tax;
+    const tax = Math.round(subtotal * 0.05);
+    // const total = subtotal + tax;
+    const total = subtotal
     const itemCount = cart.reduce((a, i) => a + i.qty, 0);
 
     return (
@@ -117,10 +123,10 @@ export default function CartDrawer({
                             <span>Subtotal</span>
                             <span className="font-semibold text-carbon-black-900">₹{subtotal}</span>
                         </div>
-                        <div className="flex justify-between text-sm text-carbon-black-500">
+                        {/* <div className="flex justify-between text-sm text-carbon-black-500">
                             <span>Taxes &amp; Charges (5%)</span>
                             <span>₹{tax}</span>
-                        </div>
+                        </div> */}
                         <div className="flex justify-between font-heading font-bold text-base text-carbon-black-900 border-t border-carbon-black-100 pt-3">
                             <span>Total</span>
                             <span className="text-cayenne-red-600">₹{total}</span>
@@ -130,6 +136,7 @@ export default function CartDrawer({
                             variant="primary"
                             size="lg"
                             className="w-full"
+                            onClick={() => socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })}
                             rightIcon={<ChevronRight className="w-4 h-4" />}
                         >
                             Place Order

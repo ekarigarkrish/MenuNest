@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import CsrfProvider from "@/components/providers/CsrfProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
+import SocketProvider from "@/components/providers/SocketProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,11 +31,15 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>
           <CsrfProvider>
-            {children}
+            <SocketProvider>
+              {children}
+            </SocketProvider>
           </CsrfProvider>
         </QueryProvider>
 
-        <Toaster position="top-right" richColors
+        <Toaster 
+          position="top-right" 
+          richColors
           toastOptions={{
             style: {
               backgroundColor: "var(--color-background)",

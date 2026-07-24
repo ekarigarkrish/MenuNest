@@ -39,6 +39,12 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const timeAgo = (dateString: string) => {
     const minutes = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 60000);
     if (minutes < 1) return "Just now";
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      if (remainingMinutes === 0) return `${hours}h ago`;
+      return `${hours}h ${remainingMinutes}m ago`;
+    }
     return `${minutes}m ago`;
   };
 
@@ -46,11 +52,11 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
     switch (order.status) {
       case "pending":
         return (
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-col xl:flex-row gap-2 mt-4">
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-red-600 border-red-200 hover:bg-red-50"
+              className="w-full text-red-600 border-red-200 hover:bg-red-50 flex-1"
               onClick={() => onStatusChange(order.id, "cancelled")}
             >
               Reject
@@ -58,7 +64,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
             <Button
               variant="primary"
               size="sm"
-              className="w-full bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500"
+              className="w-full bg-amber-500 hover:bg-amber-600 focus-visible:ring-amber-500 flex-1"
               onClick={() => onStatusChange(order.id, "accepted")}
             >
               Accept
@@ -109,30 +115,30 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
       className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
     >
       <div className="p-4 flex-1">
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-gray-900">{order.tableName}</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${statusColors[order.status] || "bg-gray-100 text-gray-800"}`}>
+        <div className="flex flex-wrap justify-between items-start mb-3 gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-lg text-gray-900 truncate">{order.tableName}</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${statusColors[order.status] || "bg-gray-100 text-gray-800"}`}>
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </span>
             </div>
             <span className="text-xs text-gray-500 font-medium">#{order.id.split('-')[0]}</span>
           </div>
-          <div className="flex items-center text-gray-500 text-sm font-medium bg-gray-50 px-2 py-1 rounded-md">
-            <Clock className="w-3.5 h-3.5 mr-1" />
+          <div className="flex items-center text-gray-500 text-sm font-medium bg-gray-50 px-2 py-1 rounded-md flex-shrink-0">
+            <Clock className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
             {timeAgo(order.createdAt)}
           </div>
         </div>
 
         <div className="space-y-2 mt-4 mb-4">
           {order.items.map((item) => (
-            <div key={item.id} className="flex justify-between items-start text-sm">
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-700">{item.quantity}x</span>
-                <span className="text-gray-600">{item.name}</span>
+            <div key={item.id} className="flex justify-between items-start text-sm gap-2">
+              <div className="flex gap-2 flex-1 min-w-0">
+                <span className="font-semibold text-gray-700 whitespace-nowrap">{item.quantity}x</span>
+                <span className="text-gray-600 line-clamp-2">{item.name}</span>
               </div>
-              <span className="text-gray-500">₹{item.price * item.quantity}</span>
+              <span className="text-gray-500 whitespace-nowrap flex-shrink-0">₹{item.price * item.quantity}</span>
             </div>
           ))}
         </div>

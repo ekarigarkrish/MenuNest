@@ -1,7 +1,7 @@
 import sequelize from "../config/db.config.js";
 import { DataTypes } from "sequelize";
 
-const customerModel = sequelize.define('customers' ,{
+const customerModel = sequelize.define('customers', {
     id: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -11,17 +11,13 @@ const customerModel = sequelize.define('customers' ,{
         type: DataTypes.STRING,
         allowNull: false
     },
-    phone:{
+    phone: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    orderId:{
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-},{
-    timestamps:true,
-    tableName:'customers'
+}, {
+    timestamps: true,
+    tableName: 'customers'
 })
 
 export default customerModel
