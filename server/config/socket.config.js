@@ -35,6 +35,14 @@ export const initSocket = (server) => {
           const tablePromise = tableModel.findOne({ where: { tableToken }, attributes: ['id', 'name'] })
           const [[customer], table] = await Promise.all([customerPromise, tablePromise])
 
+          if (!table) {
+            socket.emit("order_error", {
+              success: false,
+              message: "Table not found. Please scan a valid QR code.",
+            })
+            return
+          }
+          
           const order = await orderModel.create({ tableId: table.id, customerId: customer.id, order: cart }, { raw: true })
 
           io.emit("display_orders", {
@@ -51,10 +59,9 @@ export const initSocket = (server) => {
         });
 
       } catch (error) {
-        io.emit("display_orders", {
+        socket.emit("order_error", {
           success: false,
           message: "Order failed",
-          order: []
         })
       }
 

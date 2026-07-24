@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Clock, ChefHat, BellRing, CheckCircle2, XCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Clock, ChefHat, BellRing, CheckCircle2, XCircle, Search } from "lucide-react";
 import OrderColumn from "./_components/OrderColumn";
 import Section from "@/components/ui/Section";
 import { useLiveOrders } from "./_hooks/useLiveOrders";
@@ -58,24 +58,44 @@ function StatCard({ icon, title, count, variant }: { icon: React.ReactNode, titl
 }
 
 export default function AdminOrderManagementPage() {
+  const [searchQuery, setSearchQuery] = useState("");
   const { orders, status, isFetchingNextPage, targetRef, updateOrderStatus } = useLiveOrders();
 
-  const pendingCount = orders.filter((o) => o.status === "pending").length;
-  const preparingCount = orders.filter((o) => ["accepted", "preparing"].includes(o.status)).length;
-  const readyCount = orders.filter((o) => o.status === "ready").length;
-  const servedCount = orders.filter((o) => o.status === "served").length;
-  const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
+  const filteredOrders = orders.filter((o) =>
+    o.tableName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const pendingCount = filteredOrders.filter((o) => o.status === "pending").length;
+  const preparingCount = filteredOrders.filter((o) => ["accepted", "preparing"].includes(o.status)).length;
+  const readyCount = filteredOrders.filter((o) => o.status === "ready").length;
+  const servedCount = filteredOrders.filter((o) => o.status === "served").length;
+  const cancelledCount = filteredOrders.filter((o) => o.status === "cancelled").length;
 
   return (
     <Section className="h-[calc(100vh-2rem)] flex flex-col pt-6 px-6">
       {/* Header and Stats */}
-      <div className="mb-6 flex justify-between items-end">
+      <div className="mb-6 flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 xl:gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Live Order Dashboard</h1>
           <p className="text-gray-500 text-sm">Manage and track restaurant orders in real-time</p>
         </div>
         
-        <div className="flex gap-4">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full xl:w-auto">
+          {/* Search Bar */}
+          <div className="relative w-full lg:w-64 flex-shrink-0">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by table name..."
+              className="pl-9 pr-4 py-2 w-full border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm transition-shadow bg-white"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex gap-4 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
           <StatCard
             title="Pending"
             count={pendingCount}
@@ -104,12 +124,13 @@ export default function AdminOrderManagementPage() {
             variant="served"
           />
 
-          <StatCard
-            title="Cancelled"
-            count={cancelledCount}
-            icon={<XCircle className="w-5 h-5" />}
-            variant="cancelled"
-          />
+            <StatCard
+              title="Cancelled"
+              count={cancelledCount}
+              icon={<XCircle className="w-5 h-5" />}
+              variant="cancelled"
+            />
+          </div>
         </div>
       </div>
 
@@ -124,7 +145,7 @@ export default function AdminOrderManagementPage() {
             <OrderColumn
               title="New Orders"
               status={["pending"]}
-              orders={orders}
+              orders={filteredOrders}
               onStatusChange={updateOrderStatus}
               icon={<Clock className="w-5 h-5" />}
               colorClass="text-amber-600 bg-amber-100/50 p-1.5 rounded-md"
@@ -132,7 +153,7 @@ export default function AdminOrderManagementPage() {
             <OrderColumn
               title="In Kitchen"
               status={["accepted", "preparing"]}
-              orders={orders}
+              orders={filteredOrders}
               onStatusChange={updateOrderStatus}
               icon={<ChefHat className="w-5 h-5" />}
               colorClass="text-indigo-600 bg-indigo-100/50 p-1.5 rounded-md"
@@ -140,7 +161,7 @@ export default function AdminOrderManagementPage() {
             <OrderColumn
               title="Ready to Serve"
               status={["ready"]}
-              orders={orders}
+              orders={filteredOrders}
               onStatusChange={updateOrderStatus}
               icon={<BellRing className="w-5 h-5" />}
               colorClass="text-emerald-600 bg-emerald-100/50 p-1.5 rounded-md"
@@ -148,7 +169,7 @@ export default function AdminOrderManagementPage() {
             <OrderColumn
               title="Served"
               status={["served"]}
-              orders={orders}
+              orders={filteredOrders}
               onStatusChange={updateOrderStatus}
               icon={<CheckCircle2 className="w-5 h-5" />}
               colorClass="text-blue-600 bg-blue-100/50 p-1.5 rounded-md"
@@ -156,7 +177,7 @@ export default function AdminOrderManagementPage() {
             <OrderColumn
               title="Cancelled"
               status={["cancelled"]}
-              orders={orders}
+              orders={filteredOrders}
               onStatusChange={updateOrderStatus}
               icon={<XCircle className="w-5 h-5" />}
               colorClass="text-red-600 bg-red-100/50 p-1.5 rounded-md"
