@@ -154,6 +154,7 @@ export default function Menu() {
             <AnimatePresence>
                 {cartOpen && (
                     <CartDrawer
+                        storage={storage}
                         cart={cart}
                         onClose={() => setCartOpen(false)}
                         onIncrease={handleIncrease}

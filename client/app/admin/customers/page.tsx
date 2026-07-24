@@ -1,74 +1,57 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { 
     Search, 
     Download, 
-    MoreVertical, 
-    Edit, 
     Trash2, 
     ChevronLeft, 
     ChevronRight,
-    UserPlus
+    UserPlus,
+    ShoppingBag,
+    Loader2
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { Fetch } from "@/config/axios.config";
 
-// Dummy Data matching server/model/customer.model.js
-const DUMMY_CUSTOMERS = [
-    {
-        id: "cus_1",
-        name: "Alice Wonderland",
-        phone: "+1 (555) 123-4567",
-        orderId: "ORD-9281",
-        createdAt: "2023-10-24T10:00:00Z",
-    },
-    {
-        id: "cus_2",
-        name: "Bob Builder",
-        phone: "+1 (555) 987-6543",
-        orderId: "ORD-8742",
-        createdAt: "2023-10-25T14:30:00Z",
-    },
-    {
-        id: "cus_3",
-        name: "Charlie Chaplin",
-        phone: "+1 (555) 555-5555",
-        orderId: "ORD-3291",
-        createdAt: "2023-10-26T09:15:00Z",
-    },
-    {
-        id: "cus_4",
-        name: "Diana Prince",
-        phone: "+1 (555) 111-2222",
-        orderId: "ORD-5512",
-        createdAt: "2023-10-27T16:45:00Z",
-    },
-    {
-        id: "cus_5",
-        name: "Ethan Hunt",
-        phone: "+1 (555) 333-4444",
-        orderId: "ORD-9910",
-        createdAt: "2023-10-28T11:20:00Z",
-    },
-    {
-        id: "cus_6",
-        name: "Fiona Gallagher",
-        phone: "+1 (555) 777-8888",
-        orderId: "ORD-1029",
-        createdAt: "2023-10-29T18:05:00Z",
-    }
-];
+interface Order {
+    id: string;
+    status: string;
+    order: any;
+    createdAt: string;
+}
+
+interface Customer {
+    id: string;
+    name: string;
+    phone: string;
+    createdAt: string;
+    orders: Order[];
+}
 
 export default function CustomerManagementPage() {
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeTab, setActiveTab] = useState("All");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
 
-    const filteredCustomers = DUMMY_CUSTOMERS.filter(customer => 
-        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        customer.phone.includes(searchQuery) ||
-        customer.orderId.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    const { data: customers = [], isLoading: loading, error } = useQuery<Customer[], Error>({
+        queryKey: ['customers', debouncedSearch],
+        queryFn: async () => {
+            const res = await Fetch.get(`/api/customer?search=${encodeURIComponent(debouncedSearch)}`, { withCredentials: true, withXSRFToken: true });
+            if (res.data.success) {
+                return res.data.customers;
+            }
+            throw new Error(res.data.message || 'Failed to fetch customers');
+        }
+    });
+
+    const filteredCustomers = customers;
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -99,23 +82,7 @@ export default function CustomerManagementPage() {
             </div>
 
             {/* Filters and Search */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="flex space-x-1 bg-gray-50/80 p-1 rounded-lg border border-gray-100 w-full sm:w-auto overflow-x-auto hide-scrollbar">
-                    {["All", "Active", "New"].map((tab) => (
-                        <Button
-                        variant="ghost"
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 whitespace-nowrap ${
-                                activeTab === tab 
-                                    ? "bg-white text-gray-900 shadow-sm border border-gray-200" 
-                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                            }`}
-                        >
-                            {tab}
-                        </Button>
-                    ))}
-                </div>
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-end items-center gap-4">
 
                 <div className="relative w-full sm:w-72">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -129,6 +96,7 @@ export default function CustomerManagementPage() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+                
             </div>
 
             {/* Customers Table */}
@@ -139,13 +107,27 @@ export default function CustomerManagementPage() {
                             <tr className="bg-gray-50/50 border-b border-gray-100">
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Latest Order</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Orders</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Joined</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {filteredCustomers.length > 0 ? (
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center">
+                                        <div className="flex justify-center items-center">
+                                            <Loader2 className="h-8 w-8 text-cayenne-red-500 animate-spin" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : error ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center text-red-500">
+                                        {error.message}
+                                    </td>
+                                </tr>
+                            ) : filteredCustomers.length > 0 ? (
                                 filteredCustomers.map((customer, index) => (
                                     <motion.tr 
                                         initial={{ opacity: 0, y: 10 }}
@@ -169,9 +151,17 @@ export default function CustomerManagementPage() {
                                             <div className="text-sm text-gray-700">{customer.phone}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">
-                                                {customer.orderId}
-                                            </span>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    <ShoppingBag size={14} className="text-gray-400" />
+                                                    <span className="text-sm font-medium text-gray-700">{customer.orders?.length || 0}</span>
+                                                </div>
+                                                {customer.orders && customer.orders.length > 0 && (
+                                                    <div className="text-xs text-gray-500 max-w-[150px] truncate">
+                                                        Last: {customer.orders[0]?.id}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {formatDate(customer.createdAt)}
@@ -205,7 +195,7 @@ export default function CustomerManagementPage() {
                 {/* Pagination */}
                 <div className="bg-white px-6 py-4 border-t border-gray-100 flex items-center justify-between">
                     <div className="text-sm text-gray-500">
-                        Showing <span className="font-medium text-gray-900">1</span> to <span className="font-medium text-gray-900">{filteredCustomers.length}</span> of <span className="font-medium text-gray-900">24</span> results
+                        Showing <span className="font-medium text-gray-900">{filteredCustomers.length > 0 ? 1 : 0}</span> to <span className="font-medium text-gray-900">{filteredCustomers.length}</span> of <span className="font-medium text-gray-900">{customers.length}</span> results
                     </div>
                     <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" className="!h-8 !w-8 rounded-md" disabled>

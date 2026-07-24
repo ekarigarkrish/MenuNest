@@ -6,8 +6,8 @@ dotenv.config({
 })
 
 export default {
-    node_env: process.env.NEXT_PUBLIC_NODE_ENV,
-    isDEV: process.env.NEXT_PUBLIC_NODE_ENV === 'dev',
+    node_env: process.env.NEXT_PUBLIC_NODE_ENV || process.env.NODE_ENV,
+    isDEV: process.env.NODE_ENV === 'development',
     serverOrigin: process.env.NEXT_PUBLIC_SERVER_ORIGIN,
     clientOrigin: process.env.NEXT_PUBLIC_CLIENT_ORIGIN,
 }

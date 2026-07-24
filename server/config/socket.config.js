@@ -1,5 +1,8 @@
 import { Server } from 'socket.io';
 import config from './config.js';
+import customerModel from '../model/customer.model.js'
+import tableModel from '../model/table.model.js'
+import orderModel from '../model/order.model.js';
 
 let io;
 
@@ -14,13 +17,47 @@ export const initSocket = (server) => {
     });
 
     io.on('connection', (socket) => {
-      console.log(`🔌 New client connected: ${socket.id}`);
+      try {
+        console.log(`🔌 New client connected: ${socket.id}`);
 
-      // Add your socket event listeners here
-      socket.on('ping', (data) => {
-        console.log(`🏓 Received ping from ${socket.id}:`, data);
-        socket.emit('pong', { message: 'Pong from server!' });
-      });
+        socket.on("place_order", async (data) => {
+          const { tableToken, cart, total, firstName, lastName, phone } = data;
+          // console.log("🏓 Received place_order from " + socket.id, data);
+
+          const customerPromise = customerModel.findOrCreate({
+            where: { phone: phone.trim() },
+            defaults: {
+              name: `${firstName.trim()} ${lastName.trim()}`,
+              phone: phone.trim()
+            }
+          })
+
+          const tablePromise = tableModel.findOne({ where: { tableToken }, attributes: ['id', 'name'] })
+          const [[customer], table] = await Promise.all([customerPromise, tablePromise])
+
+          const order = await orderModel.create({ tableId: table.id, customerId: customer.id, order: cart }, { raw: true })
+
+          io.emit("display_orders", {
+            success: true,
+            message: 'order placed',
+            total, table,
+            order: {
+              id: order.id,
+              status: order.status,
+              createdAt: order.createdAt,
+              items: order.order.map(item => ({ id: item.id, quantity: item.qty, price: item.discountPrice, name: item.name, isVeg: item.isVeg === 1 }))
+            }
+          })
+        });
+
+      } catch (error) {
+        io.emit("display_orders", {
+          success: false,
+          message: "Order failed",
+          order: []
+        })
+      }
+
 
       socket.on('disconnect', () => {
         console.log(`🔌 Client disconnected: ${socket.id}`);

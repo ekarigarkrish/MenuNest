@@ -1,144 +1,174 @@
 "use client";
 
-import React, { useState } from "react";
-import { Clock, ChefHat, BellRing } from "lucide-react";
+import React from "react";
+import { Clock, ChefHat, BellRing, CheckCircle2, XCircle } from "lucide-react";
 import OrderColumn from "./_components/OrderColumn";
-import { Order, OrderStatus } from "./_components/OrderCard";
 import Section from "@/components/ui/Section";
+import { useLiveOrders } from "./_hooks/useLiveOrders";
 
-// Mock Data
-const MOCK_ORDERS: Order[] = [
-  {
-    id: "ord-001",
-    tableId: "t-1",
-    tableName: "Table 4",
-    status: "pending",
-    items: [
-      { id: "i-1", name: "Butter Chicken", quantity: 1, price: 350 },
-      { id: "i-2", name: "Garlic Naan", quantity: 3, price: 45 },
-    ],
-    totalAmount: 485,
-    createdAt: new Date(Date.now() - 5 * 60000).toISOString(), // 5 mins ago
+/**
+ * Reusable Stat Card Component
+ */
+type StatVariant = 'pending' | 'preparing' | 'ready' | 'served' | 'cancelled';
+
+const statStyles: Record<StatVariant, { card: string, icon: string, title: string, count: string }> = {
+  pending: {
+    card: "bg-amber-50 border-amber-100",
+    icon: "bg-amber-100 text-amber-600",
+    title: "text-amber-800",
+    count: "text-amber-900"
   },
-  {
-    id: "ord-002",
-    tableId: "t-2",
-    tableName: "Table 2",
-    status: "accepted",
-    items: [
-      { id: "i-3", name: "Paneer Tikka", quantity: 2, price: 280 },
-    ],
-    totalAmount: 560,
-    createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
+  preparing: {
+    card: "bg-indigo-50 border-indigo-100",
+    icon: "bg-indigo-100 text-indigo-600",
+    title: "text-indigo-800",
+    count: "text-indigo-900"
   },
-  {
-    id: "ord-003",
-    tableId: "t-3",
-    tableName: "Table 7",
-    status: "preparing",
-    items: [
-      { id: "i-4", name: "Veg Biryani", quantity: 1, price: 220 },
-      { id: "i-5", name: "Raita", quantity: 1, price: 50 },
-    ],
-    totalAmount: 270,
-    createdAt: new Date(Date.now() - 22 * 60000).toISOString(),
+  ready: {
+    card: "bg-emerald-50 border-emerald-100",
+    icon: "bg-emerald-100 text-emerald-600",
+    title: "text-emerald-800",
+    count: "text-emerald-900"
   },
-  {
-    id: "ord-004",
-    tableId: "t-4",
-    tableName: "Table 1",
-    status: "ready",
-    items: [
-      { id: "i-6", name: "Masala Dosa", quantity: 2, price: 120 },
-      { id: "i-7", name: "Filter Coffee", quantity: 2, price: 40 },
-    ],
-    totalAmount: 320,
-    createdAt: new Date(Date.now() - 30 * 60000).toISOString(),
+  served: {
+    card: "bg-blue-50 border-blue-100",
+    icon: "bg-blue-100 text-blue-600",
+    title: "text-blue-800",
+    count: "text-blue-900"
+  },
+  cancelled: {
+    card: "bg-red-50 border-red-100",
+    icon: "bg-red-100 text-red-600",
+    title: "text-red-800",
+    count: "text-red-900"
   }
-];
+};
+
+function StatCard({ icon, title, count, variant }: { icon: React.ReactNode, title: string, count: number, variant: StatVariant }) {
+  const styles = statStyles[variant];
+  return (
+    <div className={`rounded-lg p-3 border flex items-center gap-3 ${styles.card}`}>
+      <div className={`p-2 rounded-md flex-shrink-0 ${styles.icon}`}>{icon}</div>
+      <div>
+        <p className={`text-xs font-medium uppercase tracking-wider ${styles.title}`}>{title}</p>
+        <p className={`text-xl font-bold leading-none mt-1 ${styles.count}`}>{count}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminOrderManagementPage() {
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const { orders, status, isFetchingNextPage, targetRef, updateOrderStatus } = useLiveOrders();
 
-  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    setOrders((prev) => 
-      prev.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-  };
+  const pendingCount = orders.filter((o) => o.status === "pending").length;
+  const preparingCount = orders.filter((o) => ["accepted", "preparing"].includes(o.status)).length;
+  const readyCount = orders.filter((o) => o.status === "ready").length;
+  const servedCount = orders.filter((o) => o.status === "served").length;
+  const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
 
   return (
     <Section className="h-[calc(100vh-2rem)] flex flex-col pt-6 px-6">
+      {/* Header and Stats */}
       <div className="mb-6 flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Live Order Dashboard</h1>
           <p className="text-gray-500 text-sm">Manage and track restaurant orders in real-time</p>
         </div>
+        
         <div className="flex gap-4">
-          <div className="bg-amber-50 rounded-lg p-3 border border-amber-100 flex items-center gap-3">
-            <div className="p-2 bg-amber-100 text-amber-600 rounded-md">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-amber-800 font-medium uppercase tracking-wider">Pending</p>
-              <p className="text-xl font-bold text-amber-900 leading-none mt-1">
-                {orders.filter(o => o.status === 'pending').length}
-              </p>
-            </div>
-          </div>
-          <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-100 flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 text-indigo-600 rounded-md">
-              <ChefHat className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-indigo-800 font-medium uppercase tracking-wider">Preparing</p>
-              <p className="text-xl font-bold text-indigo-900 leading-none mt-1">
-                {orders.filter(o => ['accepted', 'preparing'].includes(o.status)).length}
-              </p>
-            </div>
-          </div>
-          <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-100 flex items-center gap-3">
-            <div className="p-2 bg-emerald-100 text-emerald-600 rounded-md">
-              <BellRing className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-emerald-800 font-medium uppercase tracking-wider">Ready</p>
-              <p className="text-xl font-bold text-emerald-900 leading-none mt-1">
-                {orders.filter(o => o.status === 'ready').length}
-              </p>
-            </div>
-          </div>
+          <StatCard
+            title="Pending"
+            count={pendingCount}
+            icon={<Clock className="w-5 h-5" />}
+            variant="pending"
+          />
+
+          <StatCard
+            title="Preparing"
+            count={preparingCount}
+            icon={<ChefHat className="w-5 h-5" />}
+            variant="preparing"
+          />
+
+          <StatCard
+            title="Ready"
+            count={readyCount}
+            icon={<BellRing className="w-5 h-5" />}
+            variant="ready"
+          />
+
+          <StatCard
+            title="Served"
+            count={servedCount}
+            icon={<CheckCircle2 className="w-5 h-5" />}
+            variant="served"
+          />
+
+          <StatCard
+            title="Cancelled"
+            count={cancelledCount}
+            icon={<XCircle className="w-5 h-5" />}
+            variant="cancelled"
+          />
         </div>
       </div>
 
-      {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 min-h-0 pb-6">
-        <OrderColumn
-          title="New Orders"
-          status={['pending']}
-          orders={orders}
-          onStatusChange={handleStatusChange}
-          icon={<Clock className="w-5 h-5" />}
-          colorClass="text-amber-600 bg-amber-100/50 p-1.5 rounded-md"
-        />
-        <OrderColumn
-          title="In Kitchen"
-          status={['accepted', 'preparing']}
-          orders={orders}
-          onStatusChange={handleStatusChange}
-          icon={<ChefHat className="w-5 h-5" />}
-          colorClass="text-indigo-600 bg-indigo-100/50 p-1.5 rounded-md"
-        />
-        <OrderColumn
-          title="Ready to Serve"
-          status={['ready']}
-          orders={orders}
-          onStatusChange={handleStatusChange}
-          icon={<BellRing className="w-5 h-5" />}
-          colorClass="text-emerald-600 bg-emerald-100/50 p-1.5 rounded-md"
-        />
-      </div>
+      {/* Main Kanban Content */}
+      {status === "pending" ? (
+        <div className="flex justify-center items-center h-full">Loading orders...</div>
+      ) : status === "error" ? (
+        <div className="flex justify-center items-center h-full text-red-500">Error loading orders</div>
+      ) : (
+        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 flex-1">
+            <OrderColumn
+              title="New Orders"
+              status={["pending"]}
+              orders={orders}
+              onStatusChange={updateOrderStatus}
+              icon={<Clock className="w-5 h-5" />}
+              colorClass="text-amber-600 bg-amber-100/50 p-1.5 rounded-md"
+            />
+            <OrderColumn
+              title="In Kitchen"
+              status={["accepted", "preparing"]}
+              orders={orders}
+              onStatusChange={updateOrderStatus}
+              icon={<ChefHat className="w-5 h-5" />}
+              colorClass="text-indigo-600 bg-indigo-100/50 p-1.5 rounded-md"
+            />
+            <OrderColumn
+              title="Ready to Serve"
+              status={["ready"]}
+              orders={orders}
+              onStatusChange={updateOrderStatus}
+              icon={<BellRing className="w-5 h-5" />}
+              colorClass="text-emerald-600 bg-emerald-100/50 p-1.5 rounded-md"
+            />
+            <OrderColumn
+              title="Served"
+              status={["served"]}
+              orders={orders}
+              onStatusChange={updateOrderStatus}
+              icon={<CheckCircle2 className="w-5 h-5" />}
+              colorClass="text-blue-600 bg-blue-100/50 p-1.5 rounded-md"
+            />
+            <OrderColumn
+              title="Cancelled"
+              status={["cancelled"]}
+              orders={orders}
+              onStatusChange={updateOrderStatus}
+              icon={<XCircle className="w-5 h-5" />}
+              colorClass="text-red-600 bg-red-100/50 p-1.5 rounded-md"
+            />
+          </div>
+
+          {/* Intersection Observer target for infinite scroll */}
+          <div ref={targetRef} className="h-10 w-full mt-4 flex justify-center items-center">
+            {isFetchingNextPage && <span className="text-gray-500">Loading more...</span>}
+          </div>
+        </div>
+      )}
     </Section>
   );
-}
+}
