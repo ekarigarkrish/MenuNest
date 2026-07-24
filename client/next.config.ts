@@ -3,13 +3,13 @@ import path from "path";
 import config from "./config/config";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['192.168.1.20'],
   /* config options here */
+  allowedDevOrigins:['172.22.0.1'],
   turbopack: {
     root: path.join(__dirname, "..")
   },
   images: {
-     unoptimized: config.isDEV
+    unoptimized: config.isDEV
   }
 };
 

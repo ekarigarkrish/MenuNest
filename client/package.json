@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NEXT_PUBLIC_NODE_ENV=dev next dev --turbo",
+    "dev": "cross-env NEXT_PUBLIC_NODE_ENV=dev next dev -H localhost --turbo",
     "build": "next build --turbo",
     "start": "cross-env NEXT_PUBLIC_NODE_ENV=prod next start",
     "lint": "eslint"

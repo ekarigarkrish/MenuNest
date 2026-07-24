@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { ShoppingCart, X, Plus, Minus, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { useSocket } from "@/hooks/useSocket";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 export default function CartDrawer({
     storage,
@@ -14,7 +15,7 @@ export default function CartDrawer({
     onDecrease,
     onRemove,
 }: {
-    storage:any,
+    storage: any,
     cart: any[];
     onClose: () => void;
     onIncrease: (id: string) => void;
@@ -29,6 +30,20 @@ export default function CartDrawer({
     // const total = subtotal + tax;
     const total = subtotal
     const itemCount = cart.reduce((a, i) => a + i.qty, 0);
+
+    useEffect(() => {
+        if (!socket) return;
+        
+        const handleError = (data: any) => {
+            toast.error(data.message || "Something went wrong.");
+        };
+
+        socket.on("order_error", handleError);
+        
+        return () => {
+            socket.off("order_error", handleError);
+        };
+    }, [socket]);
 
     return (
         <>
@@ -136,7 +151,10 @@ export default function CartDrawer({
                             variant="primary"
                             size="lg"
                             className="w-full"
-                            onClick={() => socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })}
+                            onClick={() => {
+                                if (!tableToken) return
+                                socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })
+                            }}
                             rightIcon={<ChevronRight className="w-4 h-4" />}
                         >
                             Place Order
