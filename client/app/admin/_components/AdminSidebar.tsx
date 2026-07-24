@@ -2,11 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Fetch } from "@/config/axios.config";
 import Button from "@/components/ui/Button";
-import { toast } from 'sonner'
+import { toast } from 'sonner';
+import { useRestaurantBranding } from "@/hooks/useRestaurantBranding";
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -36,6 +38,8 @@ export default function AdminSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { branding } = useRestaurantBranding();
+  const displayName = branding?.name || "MenuNest";
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -65,14 +69,22 @@ export default function AdminSidebar() {
     <>
       {/* Mobile Top Header */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-carbon-black-100 flex items-center justify-between px-4 z-40">
-        <Link href="/admin" className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-lg leading-none font-heading">M</span>
+        <Link href="/admin" className="flex items-center gap-2.5 group">
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
+            {branding?.logo ? (
+              <Image src={branding.logo} alt={`${displayName} logo`} fill sizes="32px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center">
+                <span className="text-white font-bold text-lg leading-none font-heading select-none">
+                  {displayName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
           </div>
           <span className="font-heading font-bold text-lg tracking-tight text-carbon-black-900">
-            MenuNest
+            {displayName}
           </span>
-          <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded ml-1">
+          <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded">
             Admin
           </span>
         </Link>
@@ -110,14 +122,22 @@ export default function AdminSidebar() {
             >
               {/* Header */}
               <div className="p-5 border-b border-carbon-black-100 flex items-center justify-between">
-                <Link href="/admin" className="flex items-center space-x-2" onClick={() => setIsMobileOpen(false)}>
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center shadow-sm">
-                    <span className="text-white font-bold text-lg leading-none font-heading">M</span>
+                <Link href="/admin" className="flex items-center gap-2.5 group" onClick={() => setIsMobileOpen(false)}>
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
+                    {branding?.logo ? (
+                      <Image src={branding.logo} alt={`${displayName} logo`} fill sizes="32px" className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center">
+                        <span className="text-white font-bold text-lg leading-none font-heading select-none">
+                          {displayName.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <span className="font-heading font-bold text-lg tracking-tight text-carbon-black-900">
-                    MenuNest
+                    {displayName}
                   </span>
-                  <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded ml-1">
+                  <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded">
                     Admin
                   </span>
                 </Link>
@@ -204,21 +224,30 @@ export default function AdminSidebar() {
 
         {/* Logo and Branding Header */}
         <div className="h-20 px-6 border-b border-carbon-black-100 flex items-center">
-          <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 shrink-0 rounded-lg bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-lg leading-none font-heading">M</span>
+          <Link href="/admin" className="flex items-center gap-3 overflow-hidden group">
+            {/* Logo mark */}
+            <div className="relative w-8 h-8 shrink-0 rounded-lg overflow-hidden shadow-sm ring-1 ring-black/5 group-hover:ring-cayenne-red-200 transition-all duration-200">
+              {branding?.logo ? (
+                <Image src={branding.logo} alt={`${displayName} logo`} fill sizes="32px" className="object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-lg leading-none font-heading select-none">
+                    {displayName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
             {!isCollapsed && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex items-center gap-1.5"
+                className="flex items-center gap-1.5 min-w-0"
               >
-                <span className="font-heading font-bold text-lg tracking-tight text-carbon-black-900 whitespace-nowrap">
-                  MenuNest
+                <span className="font-heading font-bold text-lg tracking-tight text-carbon-black-900 whitespace-nowrap truncate">
+                  {displayName}
                 </span>
-                <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded whitespace-nowrap">
+                <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
                   Admin
                 </span>
               </motion.div>
@@ -285,7 +314,7 @@ export default function AdminSidebar() {
                   transition={{ duration: 0.2 }}
                   className="flex flex-col min-w-0"
                 >
-                  <h4 className="text-sm font-semibold text-carbon-black-850 leading-tight truncate">Admin User</h4>
+                  <h4 className="text-sm font-semibold text-carbon-black-850 leading-tight truncate">Admin</h4>
                   <p className="text-xs text-carbon-black-500 truncate">Restaurant Manager</p>
                 </motion.div>
               )}
