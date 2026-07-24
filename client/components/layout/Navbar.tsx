@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import Button from "@/components/ui/Button";
+import { useRestaurantBranding } from "@/hooks/useRestaurantBranding";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { branding, isLoading } = useRestaurantBranding();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,19 +22,45 @@ export default function Navbar() {
 
   const navLinks: { name: string; href: string }[] = [];
 
+  const displayName = branding?.name || "MenuNest";
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? " backdrop-blur-md shadow-sm" : "bg-transparent"}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? "backdrop-blur-md shadow-sm" : "bg-transparent"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link href="#" className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center">
-              <span className="text-white font-bold text-xl leading-none font-heading">M</span>
+          {/* Brand Logo + Name */}
+          <Link href="#" className="flex items-center gap-2.5 group">
+            {/* Logo mark */}
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-lg ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300">
+              {branding?.logo && !isLoading ? (
+                <Image
+                  src={branding.logo}
+                  alt={`${displayName} logo`}
+                  fill
+                  sizes="36px"
+                  className="object-cover transition-opacity duration-500 opacity-100"
+                  priority
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-cayenne-red-500 to-orange-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-lg leading-none font-heading select-none">
+                    {displayName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
-            <span className="font-heading font-bold text-xl tracking-tight text-white">
-              MenuNest
+
+            {/* Restaurant name */}
+            <span
+              className={`font-heading font-bold text-xl tracking-tight text-white transition-all duration-300 ${
+                isLoading ? "opacity-0 translate-x-1" : "opacity-100 translate-x-0"
+              }`}
+            >
+              {displayName}
             </span>
           </Link>
 
@@ -62,9 +91,21 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className={`md:hidden grid transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isMobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"}`}>
+      <div
+        className={`md:hidden grid transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isMobileMenuOpen
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0 pointer-events-none"
+        }`}
+      >
         <div className="overflow-hidden">
-          <div className={`bg-white border-b border-gray-100 px-4 pt-2 pb-6 space-y-4 shadow-xl transition-all duration-500 delay-75 transform ${isMobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"}`}>
+          <div
+            className={`bg-white border-b border-gray-100 px-4 pt-2 pb-6 space-y-4 shadow-xl transition-all duration-500 delay-75 transform ${
+              isMobileMenuOpen
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-8 opacity-0"
+            }`}
+          >
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -79,5 +120,5 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-  )
+  );
 }
