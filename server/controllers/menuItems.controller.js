@@ -125,6 +125,7 @@ export default {
             isAvailable: isAvailable !== undefined ? (isAvailable === 'true' || isAvailable === true) : true,
             image: req.file?.path ?? null,
         });
+        if(!menuItem) throw ApiError('unable to create!', 400);
 
         const createdItem = menuItem.get({ plain: true });
         if (createdItem.image) {
