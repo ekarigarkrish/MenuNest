@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import CsrfProvider from "@/components/providers/CsrfProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import SocketProvider from "@/components/providers/SocketProvider";
+import ThemeProvider from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,13 +30,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} h-full antialiased scroll-smooth`} data-scroll-behavior="smooth">
       <body className="min-h-full flex flex-col font-sans">
-        <QueryProvider>
-          <CsrfProvider>
-            <SocketProvider>
-              {children}
-            </SocketProvider>
-          </CsrfProvider>
-        </QueryProvider>
+        <ThemeProvider>
+          <QueryProvider>
+            <CsrfProvider>
+              <SocketProvider>
+                {children}
+              </SocketProvider>
+            </CsrfProvider>
+          </QueryProvider>
+        </ThemeProvider>
 
         <Toaster 
           position="top-right" 

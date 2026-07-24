@@ -7,8 +7,10 @@ import * as yup from "yup";
 import Button from "@/components/ui/Button";
 import Section from "@/components/ui/Section";
 import ImageUpload from "@/components/ui/ImageUpload";
-import { Store, Save, Loader2 } from "lucide-react";
+import ColorThemePicker from "@/components/ui/ColorThemePicker";
+import { Store, Save, Loader2, Palette } from "lucide-react";
 import { useRestaurant } from "../_hooks/useRestaurant";
+import { useColorTheme } from "@/hooks/useColorTheme";
 
 // ─── Yup Schema ────────────────────────────────────────────────────────────────
 const generalSchema = yup.object({
@@ -39,6 +41,7 @@ type GeneralFormData = yup.InferType<typeof generalSchema>;
 // ─── Page ───────────────────────────────────────────────────────────────────────
 export default function GeneralPage() {
   const { restaurant, isLoading, updateRestaurantMutation } = useRestaurant();
+  const { themeId, currentTheme, setTheme, themes } = useColorTheme();
 
   const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm({
     resolver: yupResolver(generalSchema),
@@ -241,6 +244,52 @@ export default function GeneralPage() {
           </Button>
         </div>
       </form>
+
+      {/* ── Appearance / Color Theme ── */}
+      <div className="mt-10">
+        <Section className="space-y-5">
+          <div className="flex items-start justify-between gap-4 border-b border-carbon-black-100 pb-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex items-center justify-center w-9 h-9 rounded-lg flex-shrink-0"
+                style={{ backgroundColor: `${currentTheme.swatch}18` }}
+              >
+                <Palette className="w-5 h-5" style={{ color: currentTheme.swatch }} />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-carbon-black-900">Appearance</h2>
+                <p className="text-sm text-carbon-black-400 mt-0.5">
+                  Choose a color theme for the admin interface.
+                </p>
+              </div>
+            </div>
+            {/* Active theme badge */}
+            <div
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 mt-1"
+              style={{
+                backgroundColor: `${currentTheme.swatch}15`,
+                color: currentTheme.swatch,
+              }}
+            >
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: currentTheme.swatch }}
+              />
+              {currentTheme.name}
+            </div>
+          </div>
+
+          <ColorThemePicker
+            themes={themes}
+            selectedId={themeId}
+            onSelect={setTheme}
+          />
+
+          <p className="text-xs text-carbon-black-400">
+            Theme changes apply instantly and are saved to your browser. No save required.
+          </p>
+        </Section>
+      </div>
     </div>
   );
 }

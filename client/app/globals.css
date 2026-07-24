@@ -13,7 +13,7 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -117,6 +117,131 @@ html::-webkit-scrollbar {
     66% { transform: translate(-20px, 20px) scale(0.9); }
     100% { transform: translate(0px, 0px) scale(1); }
   }
+}
+
+/* ─── Color Theme Overrides ─────────────────────────────────────────────────
+   Each [data-theme] block overrides the primary accent palette.
+   Set via: document.documentElement.setAttribute('data-theme', 'id')
+──────────────────────────────────────────────────────────────────────────── */
+
+/* Ocean Blue */
+[data-theme="ocean-blue"] {
+  --color-cayenne-red-50:  #e0f6ff;
+  --color-cayenne-red-100: #b9ecff;
+  --color-cayenne-red-200: #7ddcff;
+  --color-cayenne-red-300: #3dcbff;
+  --color-cayenne-red-400: #18b8f5;
+  --color-cayenne-red-500: #0ea5e9;
+  --color-cayenne-red-600: #0284c7;
+  --color-cayenne-red-700: #0369a1;
+  --color-cayenne-red-800: #075985;
+  --color-cayenne-red-900: #0c4a6e;
+  --color-cayenne-red-950: #082f49;
+}
+
+/* Forest Green */
+[data-theme="forest-green"] {
+  --color-cayenne-red-50:  #f0fdf4;
+  --color-cayenne-red-100: #dcfce7;
+  --color-cayenne-red-200: #bbf7d0;
+  --color-cayenne-red-300: #86efac;
+  --color-cayenne-red-400: #4ade80;
+  --color-cayenne-red-500: #22c55e;
+  --color-cayenne-red-600: #16a34a;
+  --color-cayenne-red-700: #15803d;
+  --color-cayenne-red-800: #166534;
+  --color-cayenne-red-900: #14532d;
+  --color-cayenne-red-950: #052e16;
+}
+
+/* Royal Purple */
+[data-theme="royal-purple"] {
+  --color-cayenne-red-50:  #f5f3ff;
+  --color-cayenne-red-100: #ede9fe;
+  --color-cayenne-red-200: #ddd6fe;
+  --color-cayenne-red-300: #c4b5fd;
+  --color-cayenne-red-400: #a78bfa;
+  --color-cayenne-red-500: #8b5cf6;
+  --color-cayenne-red-600: #7c3aed;
+  --color-cayenne-red-700: #6d28d9;
+  --color-cayenne-red-800: #5b21b6;
+  --color-cayenne-red-900: #4c1d95;
+  --color-cayenne-red-950: #2e1065;
+}
+
+/* Rose Pink */
+[data-theme="rose-pink"] {
+  --color-cayenne-red-50:  #fff1f2;
+  --color-cayenne-red-100: #ffe4e6;
+  --color-cayenne-red-200: #fecdd3;
+  --color-cayenne-red-300: #fda4af;
+  --color-cayenne-red-400: #fb7185;
+  --color-cayenne-red-500: #f43f5e;
+  --color-cayenne-red-600: #e11d48;
+  --color-cayenne-red-700: #be123c;
+  --color-cayenne-red-800: #9f1239;
+  --color-cayenne-red-900: #881337;
+  --color-cayenne-red-950: #4c0519;
+}
+
+/* Teal */
+[data-theme="teal"] {
+  --color-cayenne-red-50:  #f0fdfa;
+  --color-cayenne-red-100: #ccfbf1;
+  --color-cayenne-red-200: #99f6e4;
+  --color-cayenne-red-300: #5eead4;
+  --color-cayenne-red-400: #2dd4bf;
+  --color-cayenne-red-500: #14b8a6;
+  --color-cayenne-red-600: #0d9488;
+  --color-cayenne-red-700: #0f766e;
+  --color-cayenne-red-800: #115e59;
+  --color-cayenne-red-900: #134e4a;
+  --color-cayenne-red-950: #042f2e;
+}
+
+/* Midnight Slate */
+[data-theme="slate"] {
+  --color-cayenne-red-50:  #f8fafc;
+  --color-cayenne-red-100: #f1f5f9;
+  --color-cayenne-red-200: #e2e8f0;
+  --color-cayenne-red-300: #cbd5e1;
+  --color-cayenne-red-400: #94a3b8;
+  --color-cayenne-red-500: #475569;
+  --color-cayenne-red-600: #334155;
+  --color-cayenne-red-700: #1e293b;
+  --color-cayenne-red-800: #0f172a;
+  --color-cayenne-red-900: #020617;
+  --color-cayenne-red-950: #000000;
+}
+
+/* Wine Red */
+[data-theme="wine-red"] {
+  --color-cayenne-red-50:  #fef2f2;
+  --color-cayenne-red-100: #fee2e2;
+  --color-cayenne-red-200: #fecaca;
+  --color-cayenne-red-300: #fca5a5;
+  --color-cayenne-red-400: #f87171;
+  --color-cayenne-red-500: #ef4444;
+  --color-cayenne-red-600: #dc2626;
+  --color-cayenne-red-700: #b91c1c;
+  --color-cayenne-red-800: #991b1b;
+  --color-cayenne-red-900: #7f1d1d;
+  --color-cayenne-red-950: #450a0a;
+}
+
+/* Coffee Brown */
+[data-theme="coffee-brown"] {
+  --color-cayenne-red-50:  #faf7f5;
+  --color-cayenne-red-100: #f5ece5;
+  --color-cayenne-red-200: #eaddd3;
+  --color-cayenne-red-300: #dcc4b6;
+  --color-cayenne-red-400: #c9a792;
+  --color-cayenne-red-500: #b5866b;
+  --color-cayenne-red-600: #a26b4e;
+  --color-cayenne-red-700: #87543c;
+  --color-cayenne-red-800: #714634;
+  --color-cayenne-red-900: #5c3b2d;
+  --color-cayenne-red-950: #331f16;
 }
 
 body {

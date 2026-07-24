@@ -181,7 +181,7 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
         formData.append("removeImage", "true");
       }
 
-      const res = initialData.id
+      const res = initialData?.id
         ? await Fetch.put(`/api/menu/${initialData.id}`, formData, {
           withCredentials: true,
           withXSRFToken: true,
@@ -199,6 +199,8 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
       reset(defaultValues);
     },
     onError: (error: any) => {
+      console.log(error);
+      
       toast.error(error.response?.data?.message || `Unable to ${initialData ? 'update' : 'create'} item!`);
     },
   });
