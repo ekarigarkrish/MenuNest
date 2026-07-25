@@ -6,6 +6,7 @@ import CsrfProvider from "@/components/providers/CsrfProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import SocketProvider from "@/components/providers/SocketProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
+import GlobalFavicon from "@/components/layout/GlobalFavicon";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -16,11 +17,6 @@ const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
 });
-
-export const metadata: Metadata = {
-  title: "MenuNest | Smart Restaurant Automation",
-  description: "Automate your restaurant, increase sales, and delight customers with MenuNest's intelligent table-ordering system.",
-};
 
 export default function RootLayout({
   children,
@@ -34,6 +30,7 @@ export default function RootLayout({
           <QueryProvider>
             <CsrfProvider>
               <SocketProvider>
+                <GlobalFavicon />
                 {children}
               </SocketProvider>
             </CsrfProvider>

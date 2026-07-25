@@ -227,8 +227,8 @@ export default function ProfilePage() {
 
             {/* Role badge — read-only */}
             {profile?.role && (
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-carbon-black-700">Role</label>
+              <div className="space-y-1.5 flex items-center gap-3">
+                <label className="text-sm font-medium mb-0 text-carbon-black-700">Role</label>
                 <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-cayenne-red-50 border border-cayenne-red-200 text-cayenne-red-700 text-sm font-medium capitalize">
                   {profile.role}
                 </div>

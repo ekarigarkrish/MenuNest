@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { ShoppingCart, X, Plus, Minus, ChevronRight } from "lucide-react";
+import { ShoppingCart, X, Plus, Minus, ChevronRight, CheckCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { useSocket } from "@/hooks/useSocket";
@@ -14,6 +14,7 @@ export default function CartDrawer({
     onIncrease,
     onDecrease,
     onRemove,
+    onClearCart,
 }: {
     storage: any,
     cart: any[];
@@ -21,6 +22,7 @@ export default function CartDrawer({
     onIncrease: (id: string) => void;
     onDecrease: (id: string) => void;
     onRemove: (id: string) => void;
+    onClearCart?: () => void;
 }) {
     const searchParams = useSearchParams();
     const tableToken = searchParams.get("tableToken");
@@ -31,19 +33,31 @@ export default function CartDrawer({
     const total = subtotal
     const itemCount = cart.reduce((a, i) => a + i.qty, 0);
 
+    const [isPlacing, setIsPlacing] = useState(false);
+    const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+
     useEffect(() => {
         if (!socket) return;
         
         const handleError = (data: any) => {
+            setIsPlacing(false);
             toast.error(data.message || "Something went wrong.");
         };
 
+        const handleSuccess = (data: any) => {
+            setIsPlacing(false);
+            setIsOrderPlaced(true);
+            if (onClearCart) onClearCart();
+        };
+
         socket.on("order_error", handleError);
+        socket.on("order_success", handleSuccess);
         
         return () => {
             socket.off("order_error", handleError);
+            socket.off("order_success", handleSuccess);
         };
-    }, [socket]);
+    }, [socket, onClearCart]);
 
     return (
         <>
@@ -85,15 +99,34 @@ export default function CartDrawer({
                         size="icon"
                         onClick={onClose}
                         aria-label="Close cart"
-                        className="w-8 h-8 p-0 rounded-full text-carbon-black-500 hover:bg-orange-400 hover:text-white transition-all duration-150"
+                        className="w-8 h-8 p-0 rounded-full text-carbon-black-500 hover:bg-cayenne-red-100 hover:text-cayenne-red-500 transition-all duration-150"
                     >
                         <X className="w-4 h-4" />
                     </Button>
                 </div>
 
-                {/* Items list */}
+                {/* Items list / Success State */}
                 <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-                    {cart.length === 0 ? (
+                    {isOrderPlaced ? (
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="flex flex-col items-center justify-center h-full text-center gap-4 py-10"
+                        >
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                                className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-green-500 mb-2"
+                            >
+                                <CheckCircle className="w-12 h-12" />
+                            </motion.div>
+                            <h3 className="font-heading font-bold text-2xl text-carbon-black-900">Order Placed!</h3>
+                            <p className="text-sm text-carbon-black-500 max-w-[250px]">
+                                Your delicious meal is being prepared. It will be served to you shortly!
+                            </p>
+                        </motion.div>
+                    ) : cart.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-carbon-black-400 gap-3 py-16">
                             <span className="text-6xl">🛒</span>
                             <p className="font-heading font-bold text-lg text-carbon-black-600">Cart is empty</p>
@@ -132,7 +165,21 @@ export default function CartDrawer({
                 </div>
 
                 {/* Footer */}
-                {cart.length > 0 && (
+                {isOrderPlaced ? (
+                    <div className="border-t border-carbon-black-100 px-5 py-4 bg-white">
+                        <Button
+                            variant="primary"
+                            size="lg"
+                            className="w-full"
+                            onClick={() => {
+                                setIsOrderPlaced(false);
+                                onClose();
+                            }}
+                        >
+                            Continue Ordering
+                        </Button>
+                    </div>
+                ) : cart.length > 0 && (
                     <div className="border-t border-carbon-black-100 px-5 py-4 space-y-3 bg-white">
                         <div className="flex justify-between text-sm text-carbon-black-600">
                             <span>Subtotal</span>
@@ -151,13 +198,15 @@ export default function CartDrawer({
                             variant="primary"
                             size="lg"
                             className="w-full"
+                            disabled={isPlacing}
                             onClick={() => {
                                 if (!tableToken) return
+                                setIsPlacing(true);
                                 socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })
                             }}
-                            rightIcon={<ChevronRight className="w-4 h-4" />}
+                            rightIcon={isPlacing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
                         >
-                            Place Order
+                            {isPlacing ? "Placing Order..." : "Place Order"}
                         </Button>
                     </div>
                 )}
