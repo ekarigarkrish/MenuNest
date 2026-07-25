@@ -117,7 +117,7 @@ export default {
             description,
             price: parseFloat(price),
             discount: parseFloat(discount) || 0,
-            discountPrice: parseFloat(discountPrice) || parseFloat(price),
+            discountPrice: parseFloat(discountPrice > 0 ? discountPrice : price),
             categoryId,
             preparationTime: parseInt(preparationTime) || 0,
             isVeg: isVeg === 'true' || isVeg === true,
@@ -195,6 +195,7 @@ export default {
             if (menuItem.image) await deleteFile(menuItem.image);
             imageValue = req.file.path;
         }
+        const discountPriceValue = parseFloat(discountPrice > 0 ? discountPrice : price);
 
         await menuItem.update({
             name: name ?? menuItem.name,
@@ -202,7 +203,7 @@ export default {
             description: description !== undefined ? description : menuItem.description,
             price: price !== undefined ? parseFloat(price) : menuItem.price,
             discount: discount !== undefined ? parseFloat(discount) : menuItem.discount,
-            discountPrice: discountPrice !== undefined ? parseFloat(discountPrice) : menuItem.discountPrice,
+            discountPrice: discountPriceValue,
             categoryId: categoryId ?? menuItem.categoryId,
             preparationTime: preparationTime !== undefined ? parseInt(preparationTime) : menuItem.preparationTime,
             isVeg: isVeg !== undefined ? (isVeg === 'true' || isVeg === true) : menuItem.isVeg,

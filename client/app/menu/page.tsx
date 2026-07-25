@@ -160,6 +160,7 @@ export default function Menu() {
                         onIncrease={handleIncrease}
                         onDecrease={handleDecrease}
                         onRemove={handleRemove}
+                        onClearCart={() => setCart([])}
                     />
                 )}
             </AnimatePresence>

@@ -56,6 +56,11 @@ export const initSocket = (server) => {
               items: order.order.map(item => ({ id: item.id, quantity: item.qty, price: item.discountPrice, name: item.name, isVeg: item.isVeg === 1 }))
             }
           })
+          
+          socket.emit("order_success", {
+            success: true,
+            message: "Order placed successfully!",
+          })
         });
 
       } catch (error) {

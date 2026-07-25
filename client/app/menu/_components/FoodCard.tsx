@@ -79,7 +79,7 @@ export default React.memo(function FoodCard({
                         <span className="font-heading font-extrabold text-carbon-black-900 text-sm sm:text-base">
                             ₹{item.discountPrice && item.discountPrice < item.price ? item.discountPrice : item.price}
                         </span>
-                        {item.discountPrice && item.discountPrice < item.price && (
+                        {item.discountPrice > 0 && item.discountPrice < item.price && (
                             <span className="text-[9px] sm:text-[10px] text-carbon-black-400 line-through">
                                 ₹{item.price}
                             </span>
