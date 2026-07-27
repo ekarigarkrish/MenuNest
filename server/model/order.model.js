@@ -20,6 +20,20 @@ const orderModel = sequelize.define("orders", {
         allowNull: false,
         defaultValue: 'pending'
     },
+    paymentMode: {
+        type: DataTypes.ENUM('online', 'offline'),
+        allowNull: false,
+        defaultValue:'offline'
+    },
+    paymentStatus: {
+        type: DataTypes.ENUM('pending', 'paid'),
+        allowNull: false,
+        defaultValue: 'pending'
+    },
+    orderId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     order: {
         type: DataTypes.JSON,
         allowNull: false,

@@ -10,4 +10,9 @@ export default {
     isDEV: process.env.NODE_ENV === 'development',
     serverOrigin: process.env.NEXT_PUBLIC_SERVER_ORIGIN,
     clientOrigin: process.env.NEXT_PUBLIC_CLIENT_ORIGIN,
+
+    // payment options
+    cfAppId: process.env.NEXT_PUBLIC_CASHFREE_APP_ID,
+    cfSecretKey: process.env.NEXT_PUBLIC_CASHFREE_SECRET_KEY,
+    cfEnv: process.env.NEXT_PUBLIC_CASHFREE_ENV,
 }

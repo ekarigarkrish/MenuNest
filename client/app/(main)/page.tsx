@@ -15,29 +15,6 @@ export default function Home() {
   const y1 = useTransform(scrollY, [0, 1000], [0, 200]);
   const y2 = useTransform(scrollY, [0, 1000], [0, -150]);
 
-  const features = [
-    {
-      title: "Smart QR Menus",
-      description: "Allow your customers to scan, browse, and order instantly without waiting for a waiter.",
-      icon: <QrCode className="w-8 h-8 text-cayenne-red-500" />
-    },
-    {
-      title: "Lightning Fast",
-      description: "Orders are beamed straight to the kitchen display in real-time, reducing errors and wait times.",
-      icon: <Zap className="w-8 h-8 text-orange-500" />
-    },
-    {
-      title: "Live Analytics",
-      description: "Track your top selling dishes and revenue streams with an intuitive real-time dashboard.",
-      icon: <BarChart3 className="w-8 h-8 text-cayenne-red-500" />
-    },
-    {
-      title: "Instant Alerts",
-      description: "Get alerted immediately for new orders, payments, and customer requests.",
-      icon: <Bell className="w-8 h-8 text-orange-500" />
-    }
-  ];
-
   return (
     <main className="min-h-screen bg-carbon-black-50 dark:bg-carbon-black-950">
       {/* Hero Section */}

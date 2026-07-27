@@ -7,6 +7,10 @@ export const Fetch = axios.create({
     xsrfHeaderName: 'x-csrf-token' // Let Axios automatically append this header
 })
 
+export const Api = axios.create({
+    baseURL: config.clientOrigin,   
+})
+
 Fetch.interceptors.request.use((config) => {
 
   return config;
