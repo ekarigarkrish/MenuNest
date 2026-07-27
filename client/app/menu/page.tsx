@@ -12,6 +12,7 @@ import CustomerDetailsForm, { CustomerDetails } from "./_components/CustomerDeta
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Fetch } from "@/config/axios.config";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
 type FoodItem = {
     id: string;
@@ -39,8 +40,22 @@ const storage = {
     }
 }
 
-export default function Menu() {
+const cartStorage = {
+    setCartDetails: (details: any) => {
+        sessionStorage.setItem('cartDetails', JSON.stringify(details));
+    },
+    getCartDetails: () => {
+        const details = sessionStorage.getItem('cartDetails');
+        return details ? JSON.parse(details) : null;
+    },
+    removeCartDetails: () => {
+        sessionStorage.removeItem('cartDetails');
+    }
+}
 
+export default function Menu() {
+    const searchParams = useSearchParams()
+    const isOnlinePaymentSuccess = searchParams.get("success")
     const [activeCategory, setActiveCategory] = useState<string>("all");
     const [search, setSearch] = useState("");
     const [cart, setCart] = useState<any[]>([]);
@@ -149,6 +164,24 @@ export default function Menu() {
         }
     }, []);
 
+    useEffect(() => {
+        if (cart.length > 0) {
+            cartStorage.setCartDetails(cart);
+        }
+    }, [cart])
+
+    useEffect(() => {
+        if (cartStorage.getCartDetails()) {
+            setCart(cartStorage.getCartDetails())
+        }
+    }, [])
+
+    useEffect(() => {
+        if (isOnlinePaymentSuccess == "true") {
+            setCartOpen(true)
+        }
+    }, [isOnlinePaymentSuccess])
+
     return (
         <>
             <AnimatePresence>
@@ -160,7 +193,10 @@ export default function Menu() {
                         onIncrease={handleIncrease}
                         onDecrease={handleDecrease}
                         onRemove={handleRemove}
-                        onClearCart={() => setCart([])}
+                        onClearCart={() => {
+                            setCart([])
+                            cartStorage.removeCartDetails()
+                        }}
                     />
                 )}
             </AnimatePresence>

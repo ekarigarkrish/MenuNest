@@ -4,10 +4,11 @@ import { ShoppingCart, X, Plus, Minus, ChevronRight, CheckCircle, Loader2 } from
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { useSocket } from "@/hooks/useSocket";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import Checkout from "@/components/ui/Checkout";
 
-export default function CartDrawer({
+export default React.memo(function CartDrawer({
     storage,
     cart,
     onClose,
@@ -25,10 +26,12 @@ export default function CartDrawer({
     onClearCart?: () => void;
 }) {
     const searchParams = useSearchParams();
+    const router = useRouter()
     const tableToken = searchParams.get("tableToken");
+    const isOnlinePaymentSuccess = searchParams.get("success")
     const { socket } = useSocket()
     const subtotal = cart.reduce((acc, i) => acc + i.discountPrice * i.qty, 0);
-    const tax = Math.round(subtotal * 0.05);
+    // const tax = Math.round(subtotal * 0.05);
     // const total = subtotal + tax;
     const total = subtotal
     const itemCount = cart.reduce((a, i) => a + i.qty, 0);
@@ -36,28 +39,52 @@ export default function CartDrawer({
     const [isPlacing, setIsPlacing] = useState(false);
     const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
+    const handleClose = () => {
+        setIsOrderPlaced(false);
+        if (isOnlinePaymentSuccess && isOnlinePaymentSuccess == "true") {
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete("success");
+            router.replace(`?${params.toString()}`);
+        }
+        onClose();
+    };
+
+     // For Online Payment Mode Error
+    const handleError = (data: any) => {
+        setIsPlacing(false);
+        toast.error(data.message || "Something went wrong.");
+    };
+
+    
     useEffect(() => {
         if (!socket) return;
         
-        const handleError = (data: any) => {
-            setIsPlacing(false);
-            toast.error(data.message || "Something went wrong.");
-        };
-
+        // For Normal/Pay Later Order Success
         const handleSuccess = (data: any) => {
             setIsPlacing(false);
             setIsOrderPlaced(true);
             if (onClearCart) onClearCart();
         };
-
+        
         socket.on("order_error", handleError);
         socket.on("order_success", handleSuccess);
-        
+
         return () => {
             socket.off("order_error", handleError);
             socket.off("order_success", handleSuccess);
         };
     }, [socket, onClearCart]);
+
+    useEffect(() => {
+        if (!socket) return;
+        
+        if (isOnlinePaymentSuccess == "true" && cart.length > 0) {
+            const urlOrderId = searchParams.get('order_id');
+            socket.emit('place_order', { cart, total, tableToken, ...storage.getDetails(), orderId: urlOrderId, paymentMode: 'online' })
+            setIsOrderPlaced(true);
+            onClearCart?.();
+        }
+    }, [isOnlinePaymentSuccess, cart, socket, searchParams])
 
     return (
         <>
@@ -67,7 +94,7 @@ export default function CartDrawer({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm"
-                onClick={onClose}
+                onClick={handleClose}
                 aria-hidden
             />
 
@@ -97,7 +124,7 @@ export default function CartDrawer({
                         id="close-cart"
                         variant="ghost"
                         size="icon"
-                        onClick={onClose}
+                        onClick={handleClose}
                         aria-label="Close cart"
                         className="w-8 h-8 p-0 rounded-full text-carbon-black-500 hover:bg-cayenne-red-100 hover:text-cayenne-red-500 transition-all duration-150"
                     >
@@ -108,7 +135,7 @@ export default function CartDrawer({
                 {/* Items list / Success State */}
                 <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                     {isOrderPlaced ? (
-                        <motion.div 
+                        <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             className="flex flex-col items-center justify-center h-full text-center gap-4 py-10"
@@ -171,10 +198,7 @@ export default function CartDrawer({
                             variant="primary"
                             size="lg"
                             className="w-full"
-                            onClick={() => {
-                                setIsOrderPlaced(false);
-                                onClose();
-                            }}
+                            onClick={handleClose}
                         >
                             Continue Ordering
                         </Button>
@@ -193,24 +217,39 @@ export default function CartDrawer({
                             <span>Total</span>
                             <span className="text-cayenne-red-600">₹{total}</span>
                         </div>
-                        <Button
-                            id="place-order-btn"
-                            variant="primary"
-                            size="lg"
-                            className="w-full"
-                            disabled={isPlacing}
-                            onClick={() => {
-                                if (!tableToken) return
-                                setIsPlacing(true);
-                                socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })
-                            }}
-                            rightIcon={isPlacing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
-                        >
-                            {isPlacing ? "Placing Order..." : "Place Order"}
-                        </Button>
+                        <div className="flex flex-col gap-3">
+                            <Checkout
+                                amount={total}
+                                customer={storage.getDetails()}
+                                className="w-full"
+                            />
+                            <div className="relative flex items-center justify-center my-1">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-carbon-black-200"></div>
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase tracking-wider">
+                                    <span className="bg-white px-2 text-carbon-black-400 font-medium">Or</span>
+                                </div>
+                            </div>
+                            <Button
+                                id="place-order-btn"
+                                variant="outline"
+                                size="lg"
+                                className="w-full border-carbon-black-200 text-carbon-black-700 hover:bg-carbon-black-50 hover:text-carbon-black-900 focus-visible:ring-carbon-black-500"
+                                disabled={isPlacing}
+                                onClick={() => {
+                                    if (!tableToken) return
+                                    setIsPlacing(true);
+                                    socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })
+                                }}
+                                rightIcon={isPlacing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
+                            >
+                                {isPlacing ? "Placing Order..." : "Place Order & Pay Later"}
+                            </Button>
+                        </div>
                     </div>
                 )}
             </motion.aside>
         </>
     );
-}
+})

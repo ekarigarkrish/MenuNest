@@ -1,7 +1,5 @@
 import React from "react";
 import OrderCard, { Order, OrderStatus } from "./OrderCard";
-// import { ScrollArea } from "@/components/ui/scroll-area"; // assuming you might have a scroll-area component or we'll use regular overflow
-
 interface OrderColumnProps {
   title: string;
   status: OrderStatus[];
@@ -11,15 +9,7 @@ interface OrderColumnProps {
   colorClass?: string;
 }
 
-export default function OrderColumn({ 
-  title, 
-  status, 
-  orders, 
-  onStatusChange, 
-  icon,
-  colorClass = "bg-gray-100 text-gray-800"
-}: OrderColumnProps) {
-  
+export default function OrderColumn({ title, status, orders, onStatusChange, icon, colorClass = "bg-gray-100 text-gray-800" }: OrderColumnProps) {
   const columnOrders = orders.filter(order => status.includes(order.status));
 
   return (
@@ -47,7 +37,7 @@ export default function OrderColumn({
             </div>
           ) : (
             columnOrders.map(order => (
-              <OrderCard 
+              <OrderCard
                 key={order.id} 
                 order={order} 
                 onStatusChange={onStatusChange} 

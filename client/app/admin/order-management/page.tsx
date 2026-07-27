@@ -79,7 +79,7 @@ export default function AdminOrderManagementPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Live Order Dashboard</h1>
           <p className="text-gray-500 text-sm">Manage and track restaurant orders in real-time</p>
         </div>
-        
+
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full xl:w-auto">
           {/* Search Bar */}
           <div className="relative w-full lg:w-64 flex-shrink-0">
@@ -96,33 +96,33 @@ export default function AdminOrderManagementPage() {
           </div>
 
           <div className="flex gap-4 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
-          <StatCard
-            title="Pending"
-            count={pendingCount}
-            icon={<Clock className="w-5 h-5" />}
-            variant="pending"
-          />
+            <StatCard
+              title="Pending"
+              count={pendingCount}
+              icon={<Clock className="w-5 h-5" />}
+              variant="pending"
+            />
 
-          <StatCard
-            title="Preparing"
-            count={preparingCount}
-            icon={<ChefHat className="w-5 h-5" />}
-            variant="preparing"
-          />
+            <StatCard
+              title="Preparing"
+              count={preparingCount}
+              icon={<ChefHat className="w-5 h-5" />}
+              variant="preparing"
+            />
 
-          <StatCard
-            title="Ready"
-            count={readyCount}
-            icon={<BellRing className="w-5 h-5" />}
-            variant="ready"
-          />
+            <StatCard
+              title="Ready"
+              count={readyCount}
+              icon={<BellRing className="w-5 h-5" />}
+              variant="ready"
+            />
 
-          <StatCard
-            title="Served"
-            count={servedCount}
-            icon={<CheckCircle2 className="w-5 h-5" />}
-            variant="served"
-          />
+            <StatCard
+              title="Served"
+              count={servedCount}
+              icon={<CheckCircle2 className="w-5 h-5" />}
+              variant="served"
+            />
 
             <StatCard
               title="Cancelled"
