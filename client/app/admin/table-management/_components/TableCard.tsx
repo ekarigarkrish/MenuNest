@@ -11,7 +11,7 @@ interface TableCardProps {
   onConfirmDelete: (table: TableData) => void;
 }
 
-export default function TableCard({
+export default React.memo(function TableCard({
   table,
   onOpenQrModal,
   onOpenEditModal,
@@ -51,21 +51,21 @@ export default function TableCard({
           </span>
         </div>
       </div>
-      <div className="flex flex-col 2xs:flex-row sm:flex-col md:flex-row items-stretch 2xs:items-center sm:items-stretch md:items-center gap-2 mt-auto">
+      <div className="flex items-center gap-2 mt-auto pt-1">
         <Button 
           variant="primary" 
           size="sm" 
-          className="flex-1 py-2 w-full 2xs:w-auto sm:w-full md:w-auto"
-          leftIcon={<QrCode className="w-4 h-4" />}
+          className="flex-1 flex items-center justify-center gap-2 h-full"
           onClick={() => onOpenQrModal(table)}
         >
-          QR Code
+          <QrCode className="w-4 h-4" />
+          <span>View QR</span>
         </Button>
-        <div className="flex items-center gap-2 w-full 2xs:w-auto sm:w-full md:w-auto justify-end">
+        <div className="flex items-center gap-1.5 shrink-0">
           <Button 
             variant="secondary" 
             size="icon" 
-            className="text-gray-500 hover:text-gray-700 flex-shrink-0 w-full 2xs:w-10 sm:w-full md:w-10 flex-1 2xs:flex-none sm:flex-1 md:flex-none"
+            className="text-gray-500 hover:text-gray-700"
             onClick={() => onOpenEditModal(table)}
             title="Edit Table"
           >
@@ -74,7 +74,7 @@ export default function TableCard({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-red-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0 w-full 2xs:w-10 sm:w-full md:w-10 flex-1 2xs:flex-none sm:flex-1 md:flex-none"
+            className="text-red-500 hover:text-red-600 hover:bg-red-50"
             onClick={() => onConfirmDelete(table)}
             title="Delete Table"
           >
@@ -84,4 +84,4 @@ export default function TableCard({
       </div>
     </motion.div>
   );
-}
+})

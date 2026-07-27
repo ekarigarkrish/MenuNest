@@ -8,6 +8,7 @@ import customerRoutes from './customer.routes.js'
 import settingsRoutes from './settings.routes.js'
 import restaurantRoutes from './restaurant.routes.js'
 import profileRoutes from './profile.routes.js'
+import analyticsRoutes from './analytics.routes.js'
 import { doubleCsrfProtection } from '../services/csrf.service.js'
 import { isAuthenticated } from '../middleware/auth.middleware.js'
 const router = express.Router({ caseSensitive: true })
@@ -38,5 +39,8 @@ router.use('/api/settings', doubleCsrfProtection, settingsRoutes)
 
 // Profile Routes (current user profile)
 router.use('/api/profile', doubleCsrfProtection, profileRoutes)
+
+// Analytics Routes (admin dashboard summary)
+router.use('/api/analytics', doubleCsrfProtection, analyticsRoutes)
 
 export default router
