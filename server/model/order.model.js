@@ -34,6 +34,11 @@ const orderModel = sequelize.define("orders", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    total:{
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+    },
     order: {
         type: DataTypes.JSON,
         allowNull: false,

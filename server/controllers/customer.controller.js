@@ -44,6 +44,7 @@ export default {
                 required: false // LEFT JOIN so we don't drop customers without orders
             }],
             order: [['createdAt', 'DESC']],
+            attributes:['id','name','phone','createdAt'],
             subQuery: false // required when referencing included models in top-level where clause
         });
         return res.status(200).json({ success: true, customers });
