@@ -29,12 +29,14 @@ export default {
         if (plain.logo) {
             plain.logo = `${req.protocol}://${req.get('host')}/${plain.logo}`
         }
+        plain.gst_rate = parseFloat(plain.gst_rate)
+        // console.log(plain);
 
         return res.status(200).json({ success: true, restaurant: plain })
     }, 'getRestaurant'),
 
     updateRestaurant: asyncHandler(async (req, res) => {
-        const { name, description, contactEmail, contactPhone, removeLogo } = req.body
+        const { name, description, contactEmail, contactPhone, removeLogo, gst_enabled, gst_type, gst_rate } = req.body
 
         const restaurant = await getOrCreateRestaurant()
 
@@ -57,7 +59,10 @@ export default {
             description: description !== undefined ? description : restaurant.description,
             contactEmail: contactEmail !== undefined ? contactEmail : restaurant.contactEmail,
             contactPhone: contactPhone !== undefined ? contactPhone : restaurant.contactPhone,
-            logo: logoValue
+            logo: logoValue,
+            gst_enabled: gst_enabled !== undefined ? (gst_enabled === 'true' || gst_enabled === true) : restaurant.gst_enabled,
+            gst_type: gst_type !== undefined ? gst_type : restaurant.gst_type,
+            gst_rate: gst_rate !== undefined ? parseFloat(gst_rate) : restaurant.gst_rate
         })
 
         const updatedPlain = restaurant.get({ plain: true })

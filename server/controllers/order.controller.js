@@ -37,6 +37,8 @@ export default {
                 tableName: order.table ? order.table.name : 'Unknown Table',
                 status: order.status,
                 items: items,
+                paymentMode: order.paymentMode,
+                paymentStatus: order.paymentStatus,
                 totalAmount: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
                 createdAt: order.createdAt
             };

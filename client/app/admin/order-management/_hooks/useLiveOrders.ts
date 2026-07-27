@@ -30,6 +30,7 @@ export function useLiveOrders() {
   });
 
   const orders: Order[] = data ? data.pages.flatMap((page) => page.data || []) : [];
+  // console.log(orders);
 
   // Handle infinite scroll trigger
   useEffect(() => {

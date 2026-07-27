@@ -12,6 +12,9 @@ export interface RestaurantBranding {
   description: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  gst_enabled: boolean
+  gst_type: string
+  gst_rate: number
 }
 
 interface CachedBranding {

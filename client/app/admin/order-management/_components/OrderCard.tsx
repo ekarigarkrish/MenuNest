@@ -21,6 +21,7 @@ export interface Order {
   totalAmount: number;
   createdAt: string;
   customerName?: string;
+  paymentMode?: string;
 }
 
 interface OrderCardProps {
@@ -115,6 +116,18 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
       className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
     >
       <div className="p-4 flex-1">
+        {
+          order.paymentMode === 'online' && (
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm text-gray-500 font-medium">Payment Mode</span>
+              <div className="flex items-center gap-2">
+                <span className={`px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800`}>
+                  {order.paymentMode}
+                </span>
+              </div>
+            </div>
+          )
+        }
         <div className="flex flex-wrap justify-between items-start mb-3 gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">

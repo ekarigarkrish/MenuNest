@@ -9,6 +9,9 @@ export interface Restaurant {
   logo: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  gst_enabled: boolean;
+  gst_type: "percentage" | "fixed";
+  gst_rate: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -27,6 +27,21 @@ const restaurantModel = sequelize.define('restaurant', {
     contactPhone: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    gst_enabled:{
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    gst_type:{
+        type: DataTypes.ENUM('percentage', 'fixed'),
+        allowNull: false,
+        defaultValue: 'percentage'
+    },
+    gst_rate:{
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 5
     }
 }, {
     timestamps: true,
