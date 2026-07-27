@@ -11,6 +11,7 @@ interface OrderColumnProps {
 
 export default function OrderColumn({ title, status, orders, onStatusChange, icon, colorClass = "bg-gray-100 text-gray-800" }: OrderColumnProps) {
   const columnOrders = orders.filter(order => status.includes(order.status));
+// console.log(columnOrders);
 
   return (
     <div className="flex flex-col bg-gray-50/50 rounded-2xl border border-gray-100/50 h-full overflow-hidden">

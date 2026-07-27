@@ -7,6 +7,27 @@ import { useSocket } from "@/hooks/useSocket";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Checkout from "@/components/ui/Checkout";
+import { useRestaurantBranding } from "@/hooks/useRestaurantBranding";
+
+function taxCulculation(subtotal: number) {
+    const { branding } = useRestaurantBranding();
+    if (!branding?.gst_enabled) return { total: subtotal, tax: 0 };
+
+    const { gst_rate, gst_type } = branding;
+    if (gst_type === "percentage") {
+        return {
+            total: parseFloat((subtotal + subtotal * (gst_rate / 100)).toFixed(2)),
+            tax: parseFloat((subtotal * (gst_rate / 100)).toFixed(2)),
+            gst_rate, gst_type
+        }
+    }
+
+    return {
+        total: parseFloat((subtotal + gst_rate).toFixed(2)),
+        tax: parseFloat((gst_rate).toFixed(2)),
+        gst_rate, gst_type
+    }
+}
 
 export default React.memo(function CartDrawer({
     storage,
@@ -31,9 +52,11 @@ export default React.memo(function CartDrawer({
     const isOnlinePaymentSuccess = searchParams.get("success")
     const { socket } = useSocket()
     const subtotal = cart.reduce((acc, i) => acc + i.discountPrice * i.qty, 0);
+    // console.log(taxCulculation(subtotal));
+
     // const tax = Math.round(subtotal * 0.05);
     // const total = subtotal + tax;
-    const total = subtotal
+    const { total, tax, gst_rate, gst_type } = taxCulculation(subtotal)
     const itemCount = cart.reduce((a, i) => a + i.qty, 0);
 
     const [isPlacing, setIsPlacing] = useState(false);
@@ -44,28 +67,28 @@ export default React.memo(function CartDrawer({
         if (isOnlinePaymentSuccess && isOnlinePaymentSuccess == "true") {
             const params = new URLSearchParams(searchParams.toString());
             params.delete("success");
+            params.delete('order_id')
             router.replace(`?${params.toString()}`);
         }
         onClose();
     };
 
-     // For Online Payment Mode Error
+    // For Online Payment Mode Error
     const handleError = (data: any) => {
         setIsPlacing(false);
         toast.error(data.message || "Something went wrong.");
     };
 
-    
     useEffect(() => {
         if (!socket) return;
-        
+
         // For Normal/Pay Later Order Success
         const handleSuccess = (data: any) => {
             setIsPlacing(false);
             setIsOrderPlaced(true);
             if (onClearCart) onClearCart();
         };
-        
+
         socket.on("order_error", handleError);
         socket.on("order_success", handleSuccess);
 
@@ -77,7 +100,7 @@ export default React.memo(function CartDrawer({
 
     useEffect(() => {
         if (!socket) return;
-        
+
         if (isOnlinePaymentSuccess == "true" && cart.length > 0) {
             const urlOrderId = searchParams.get('order_id');
             socket.emit('place_order', { cart, total, tableToken, ...storage.getDetails(), orderId: urlOrderId, paymentMode: 'online' })
@@ -209,10 +232,10 @@ export default React.memo(function CartDrawer({
                             <span>Subtotal</span>
                             <span className="font-semibold text-carbon-black-900">₹{subtotal}</span>
                         </div>
-                        {/* <div className="flex justify-between text-sm text-carbon-black-500">
-                            <span>Taxes &amp; Charges (5%)</span>
+                        <div className="flex justify-between text-sm text-carbon-black-500">
+                            <span>Taxes &amp; Charges {gst_type === "percentage" ? `(${gst_rate}%)` : `(₹${gst_rate})`}</span>
                             <span>₹{tax}</span>
-                        </div> */}
+                        </div>
                         <div className="flex justify-between font-heading font-bold text-base text-carbon-black-900 border-t border-carbon-black-100 pt-3">
                             <span>Total</span>
                             <span className="text-cayenne-red-600">₹{total}</span>
