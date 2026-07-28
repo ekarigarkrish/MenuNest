@@ -15,7 +15,6 @@ import {
 import Container from "@/components/ui/Container";
 import Section from "@/components/ui/Section";
 import { useAnalytics } from "@/hooks/useAnalytics";
-
 import KpiCard from "./_components/dashboard/KpiCard";
 import Button from "@/components/ui/Button";
 
@@ -123,7 +122,7 @@ export default function AdminDashboardPage() {
 
                         {/* Refresh indicator */}
                         <Button
-                        variant='primary'
+                            variant="primary"
                             onClick={() => refetch()}
                             disabled={isFetching}
                             title="Refresh data"

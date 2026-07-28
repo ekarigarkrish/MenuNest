@@ -113,7 +113,6 @@ export default {
                 createdAt: order.createdAt
             };
         });
-        console.log(formattedOrders);
 
         const totalPages = Math.ceil(count / limit);
 

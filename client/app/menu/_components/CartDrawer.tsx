@@ -233,7 +233,7 @@ export default React.memo(function CartDrawer({
                             <span className="font-semibold text-carbon-black-900">₹{subtotal}</span>
                         </div>
                         <div className="flex justify-between text-sm text-carbon-black-500">
-                            <span>Taxes &amp; Charges {gst_type === "percentage" ? `(${gst_rate}%)` : `(₹${gst_rate})`}</span>
+                            <span>Taxes &amp; Charges {gst_type === "percentage" ? `(${gst_rate || 0}%)` : `(₹${gst_rate || 0})`}</span>
                             <span>₹{tax}</span>
                         </div>
                         <div className="flex justify-between font-heading font-bold text-base text-carbon-black-900 border-t border-carbon-black-100 pt-3">

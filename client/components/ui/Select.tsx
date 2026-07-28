@@ -51,12 +51,12 @@ const Select: React.FC<SelectProps> = ({
     queryKey: ["select-options", api, debouncedSearchQuery],
     queryFn: async () => {
       if (!api) return [];
-      const res = await Fetch.get(api, { 
+      const res = await Fetch.get(api, {
         params: { search: debouncedSearchQuery },
-        withCredentials: true, 
-        withXSRFToken: true 
+        withCredentials: true,
+        withXSRFToken: true
       });
-      
+
       return res.data?.categories?.map((item: any) => ({
         label: item.name || item.label || item.title,
         value: item.id || item.value,
@@ -66,13 +66,13 @@ const Select: React.FC<SelectProps> = ({
   });
 
   const finalOptions = api ? apiOptions : options;
-  const selectedOption = finalOptions.find((opt:any) => opt.value === value);
-  
-  const filteredOptions = api 
-    ? finalOptions 
-    : finalOptions.filter((option:any) => 
-        option.label.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const selectedOption = finalOptions.find((opt: any) => opt.value === value);
+
+  const filteredOptions = api
+    ? finalOptions
+    : finalOptions.filter((option: any) =>
+      option.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   // Handle outside click
   useEffect(() => {
@@ -108,13 +108,12 @@ const Select: React.FC<SelectProps> = ({
       <div className="relative">
         <div
           onClick={() => !isOpen && setIsOpen(true)}
-          className={`w-full h-auto px-4 py-2.5 bg-white border cursor-pointer flex items-center justify-between ${
-            error
+          className={`w-full h-auto px-4 py-2.5 bg-white border cursor-pointer flex items-center justify-between ${error
               ? "border-red-500 focus-within:ring-4 focus-within:ring-red-500/10 focus-within:border-red-500"
               : isOpen
-              ? "border-cayenne-red-500 ring-4 ring-cayenne-red-500/10"
-              : "border-gray-200 hover:border-gray-300"
-          } rounded-xl text-sm outline-none transition-all shadow-sm ${className}`}
+                ? "border-cayenne-red-500 ring-4 ring-cayenne-red-500/10"
+                : "border-gray-200 hover:border-gray-300"
+            } rounded-xl text-sm outline-none transition-all shadow-sm ${className}`}
         >
           {isOpen ? (
             <input
@@ -132,18 +131,17 @@ const Select: React.FC<SelectProps> = ({
             </span>
           )}
           <div onClick={(e) => {
-              if (isOpen) {
-                e.stopPropagation();
-                setIsOpen(false);
-              }
-            }}
+            if (isOpen) {
+              e.stopPropagation();
+              setIsOpen(false);
+            }
+          }}
             className="cursor-pointer p-0.5 rounded-md hover:bg-gray-100 transition-colors ml-2 shrink-0"
           >
             <ChevronDown
               size={18}
-              className={`text-gray-500 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </div>
         </div>
@@ -169,7 +167,7 @@ const Select: React.FC<SelectProps> = ({
                     No matching options found
                   </div>
                 ) : (
-                  filteredOptions.map((option:SelectOption) => (
+                  filteredOptions.map((option: SelectOption) => (
                     <Button
                       key={option.value}
                       variant="ghost"
@@ -178,11 +176,10 @@ const Select: React.FC<SelectProps> = ({
                         onChange(option.value);
                         setIsOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-start group rounded-none ${
-                        value === option.value
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-start group rounded-none ${value === option.value
                           ? "bg-cayenne-red-50 text-cayenne-red-600 font-medium"
                           : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <span>{option.label}</span>
                       {value === option.value && (
