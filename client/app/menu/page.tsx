@@ -227,6 +227,15 @@ export default function Menu() {
                             </h1>
                         </div>
 
+                        {/* <Button
+                            id="my-orders-btn"
+                            variant="primary"
+                            onClick={() => {}}
+                            aria-label="My orders"
+                            className="fixed bottom-10 right-5 z-20 self-start sm:self-auto sm:relative !rounded-xl"
+                        >
+                           My orders
+                        </Button> */}
                         {/* Cart Button */}
                         <Button
                             id="open-cart-btn"
@@ -244,7 +253,7 @@ export default function Menu() {
                             <ShoppingCart className="w-5 h-5 mr-2" />
                             <span className="font-heading">Cart</span>
                             {totalCartQty > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                                <span className="absolute -top-2 -right-2 bg-white text-cayenne-red-500 text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
                                     {totalCartQty}
                                 </span>
                             )}
