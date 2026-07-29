@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import OrderCard, { Order, OrderStatus } from "./OrderCard";
 interface OrderColumnProps {
   title: string;
@@ -10,12 +10,54 @@ interface OrderColumnProps {
 }
 
 export default function OrderColumn({ title, status, orders, onStatusChange, icon, colorClass = "bg-gray-100 text-gray-800" }: OrderColumnProps) {
+  const [dragCounter, setDragCounter] = useState(0);
   const columnOrders = orders.filter(order => status.includes(order.status));
-// console.log(columnOrders);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragCounter((prev) => prev + 1);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // Required to allow drop
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragCounter((prev) => prev - 1);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragCounter(0);
+    
+    const orderId = e.dataTransfer.getData("orderId");
+    const sourceStatus = e.dataTransfer.getData("sourceStatus") as OrderStatus;
+    
+    // Check if order exists and isn't already in this column
+    if (orderId && !status.includes(sourceStatus)) {
+      // Use the primary (first) status defined for this column
+      onStatusChange(orderId, status[0]);
+    }
+  };
+
+  const isDragOver = dragCounter > 0;
 
   return (
-    <div className="flex flex-col bg-gray-50/50 rounded-2xl border border-gray-100/50 h-full overflow-hidden">
-      <div className="p-4 border-b border-gray-100/80 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+    <div 
+      className={`flex flex-col rounded-2xl border h-full overflow-hidden transition-all duration-200 ${
+        isDragOver 
+          ? "bg-gray-100/80 border-gray-300 ring-4 ring-gray-100/50" 
+          : "bg-gray-50/50 border-gray-100/50"
+      }`}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <div className={`p-4 border-b border-gray-100/80 sticky top-0 z-10 transition-colors duration-200 ${
+        isDragOver ? "bg-gray-100/80" : "bg-white/50 backdrop-blur-sm"
+      }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {icon && <div className={colorClass}>{icon}</div>}

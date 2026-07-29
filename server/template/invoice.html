@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            padding: 40px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            color: #c82333;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .details {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .details div {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+        }
+
+        th.right {
+            text-align: right;
+        }
+
+        th.center {
+            text-align: center;
+        }
+
+        .totals {
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            border-top: 2px solid #333;
+            padding-top: 15px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .total-row.grand {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>{{RESTAURANT_NAME}}</h1>
+        {{RESTAURANT_PHONE_HTML}}
+        {{RESTAURANT_EMAIL_HTML}}
+    </div>
+
+    <div class="details">
+        <div>
+            <strong>Bill To:</strong><br />
+            {{CUSTOMER_NAME}}<br />
+            {{CUSTOMER_PHONE}}
+        </div>
+        <div style="text-align: right;">
+            <strong>Order #:</strong> {{ORDER_ID}}<br />
+            <strong>Date:</strong> {{ORDER_DATE}}<br />
+            <strong>Status:</strong> {{ORDER_STATUS}}<br />
+            <strong>Table:</strong> {{TABLE_NAME}}
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th class="center">Qty</th>
+                <th class="right">Price</th>
+                <th class="right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ITEMS_HTML}}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal:</span>
+            <span>₹{{SUBTOTAL}}</span>
+        </div>
+        <div class="total-row">
+            <span>{{TAX_LABEL}}</span>
+            <span>₹{{TAX_TOTAL}}</span>
+        </div>
+        <div class="total-row grand">
+            <span>Total:</span>
+            <span>₹{{GRAND_TOTAL}}</span>
+        </div>
+        <div class="total-row" style="margin-top: 5px; color: #666;">
+            <span>Payment Mode:</span>
+            <span style="text-transform: capitalize;">{{PAYMENT_MODE}}</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Thank you for dining with us!
+    </div>
+</body>
+
+</html>

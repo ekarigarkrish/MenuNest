@@ -12,7 +12,7 @@ export function useLiveOrders() {
   const { targetRef, isIntersecting } = useIntersectionObserver();
 
   const fetchOrders = async ({ pageParam = 1 }) => {
-    const res = await Fetch.get(`/api/order/get/data?page=${pageParam}&limit=10`, {
+    const res = await Fetch.get(`/api/order/get/data?page=${pageParam}&limit=20`, {
       withCredentials: true,
       withXSRFToken: true,
     });
@@ -24,13 +24,10 @@ export function useLiveOrders() {
     queryFn: fetchOrders,
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
-      lastPage.pagination.page < lastPage.pagination.totalPages
-        ? lastPage.pagination.page + 1
-        : undefined,
+      lastPage.pagination.page < lastPage.pagination.totalPages ? lastPage.pagination.page + 1 : undefined,
   });
 
   const orders: Order[] = data ? data.pages.flatMap((page) => page.data || []) : [];
-  // console.log(orders);
 
   // Handle infinite scroll trigger
   useEffect(() => {

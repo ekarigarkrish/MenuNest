@@ -200,7 +200,6 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
     },
     onError: (error: any) => {
       console.log(error);
-      
       toast.error(error.response?.data?.message || `Unable to ${initialData ? 'update' : 'create'} item!`);
     },
   });
@@ -246,6 +245,7 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
               <ToggleField control={control} name="isAvailable" label="Available" description="Show on live menu" />
               <ToggleField control={control} name="isFeatured" label="Featured" description="Highlight item" />
               <ToggleField control={control} name="isVegetarian" label="Vegetarian" description="Mark as veg" colorClass="peer-checked:bg-green-500" />
+              <ToggleField control={control} name="isBeverage" label="Is Beverage" description="Mark as beverage" colorClass="peer-checked:bg-blue-500" />
             </div>
           </div>
 

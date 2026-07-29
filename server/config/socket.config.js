@@ -21,8 +21,17 @@ export const initSocket = (server) => {
         console.log(`🔌 New client connected: ${socket.id}`);
 
         socket.on("place_order", async (data) => {
-          const { tableToken, cart, total, firstName, lastName, phone, orderId, paymentMode } = data;
+          const { tableToken, cart,tax,gst_type, gst_rate, total, firstName, lastName, phone, orderId, paymentMode } = data;
           // console.log("🏓 Received place_order from " + socket.id, data);
+
+           if (!phone) {
+            socket.emit("order_error", {
+              success: false,
+              message: "Something went wrong!",
+              isphoneExist:false
+            })
+            return
+          }
 
           const customerPromise = customerModel.findOrCreate({
             where: { phone: phone.trim() },
@@ -45,7 +54,7 @@ export const initSocket = (server) => {
 
           const order = await orderModel.create({
             tableId: table.id, customerId: customer.id, order: cart,
-            ...(paymentMode === 'online' && { orderId, paymentStatus: 'paid', paymentMode })
+            ...(paymentMode === 'online' && { total, tax, gst_type, gst_rate, orderId, paymentStatus: 'paid', paymentMode })
           }, { raw: true })
 
           io.emit("display_orders", {

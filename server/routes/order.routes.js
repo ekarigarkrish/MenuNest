@@ -4,7 +4,15 @@ import { isAuthenticated } from '../middleware/auth.middleware.js'
 const router = express.Router({ caseSensitive: true })
 
 router.get('/get/data', isAuthenticated('admin'), orderController.getliveReceivingData)
+
 router.get('/all', isAuthenticated('admin'), orderController.getAllOrders)
+
 router.patch('/update/status/:id', isAuthenticated('admin'), orderController.updateOrderStatus)
+
+router.patch('/update-payment-status/:id', isAuthenticated('admin'), orderController.updatePaymentStatus)
+
+router.post('/customer/orders', orderController.getCustomerOrderHistory)
+
+router.get('/:id/receipt', orderController.getReceipt)
 
 export default router

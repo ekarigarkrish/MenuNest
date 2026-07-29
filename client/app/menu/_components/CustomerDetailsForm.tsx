@@ -11,7 +11,7 @@ export type CustomerDetails = {
     lastName: string;
 };
 
-export default function CustomerDetailsForm({
+export default React.memo(function CustomerDetailsForm({
     isOpen,
     onClose,
     onSubmit,
@@ -160,4 +160,4 @@ export default function CustomerDetailsForm({
             </AnimatePresence>
         </Modal>
     );
-}
+})

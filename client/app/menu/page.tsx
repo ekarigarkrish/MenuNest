@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Search, ShoppingCart, Flame, Leaf } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import CartDrawer from "./_components/CartDrawer";
+import OrdersDrawer from "./_components/OrdersDrawer";
 import FoodCard from "./_components/FoodCard";
 import CustomerDetailsForm, { CustomerDetails } from "./_components/CustomerDetailsForm";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
@@ -53,13 +54,14 @@ const cartStorage = {
     }
 }
 
-export default function Menu() {
+export default React.memo(function Menu() {
     const searchParams = useSearchParams()
     const isOnlinePaymentSuccess = searchParams.get("success")
     const [activeCategory, setActiveCategory] = useState<string>("all");
     const [search, setSearch] = useState("");
     const [cart, setCart] = useState<any[]>([]);
     const [cartOpen, setCartOpen] = useState(false);
+    const [ordersOpen, setOrdersOpen] = useState(false);
     const [customerFormOpen, setCustomerFormOpen] = useState(false);
     const [customer, setCustomer] = useState<CustomerDetails | null>(null);
     const [dietFilter, setDietFilter] = useState<"all" | "veg" | "non-veg">("all");
@@ -193,10 +195,20 @@ export default function Menu() {
                         onIncrease={handleIncrease}
                         onDecrease={handleDecrease}
                         onRemove={handleRemove}
+                        onCustomerFormOpen={() => setCustomerFormOpen(true)}
                         onClearCart={() => {
                             setCart([])
                             cartStorage.removeCartDetails()
                         }}
+                    />
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {ordersOpen && (
+                    <OrdersDrawer
+                        onClose={() => setOrdersOpen(false)}
+                        phone={customer?.phone}
                     />
                 )}
             </AnimatePresence>
@@ -215,7 +227,7 @@ export default function Menu() {
                 <Container className="py-8 md:py-12">
 
                     {/* ── Page Header ── */}
-                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                         <div>
                             <p className="text-cayenne-red-500 font-semibold text-sm uppercase tracking-widest mb-1">
                                 Our Menu
@@ -227,37 +239,40 @@ export default function Menu() {
                             </h1>
                         </div>
 
-                        {/* <Button
-                            id="my-orders-btn"
-                            variant="primary"
-                            onClick={() => {}}
-                            aria-label="My orders"
-                            className="fixed bottom-10 right-5 z-20 self-start sm:self-auto sm:relative !rounded-xl"
-                        >
-                           My orders
-                        </Button> */}
-                        {/* Cart Button */}
-                        <Button
-                            id="open-cart-btn"
-                            variant="primary"
-                            onClick={() => {
-                                if (!customer) {
-                                    setCustomerFormOpen(true);
-                                } else {
-                                    setCartOpen(true);
-                                }
-                            }}
-                            aria-label="Open cart"
-                            className="fixed bottom-10 right-5 z-20 self-start sm:self-auto sm:relative !rounded-xl"
-                        >
-                            <ShoppingCart className="w-5 h-5 mr-2" />
-                            <span className="font-heading">Cart</span>
-                            {totalCartQty > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-white text-cayenne-red-500 text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
-                                    {totalCartQty}
-                                </span>
-                            )}
-                        </Button>
+                        <div className="flex gap-4 justify-between">
+                            <Button
+                                id="my-orders-btn"
+                                variant="primary"
+                                onClick={() => {
+                                    if (!customer) setCustomerFormOpen(true);
+                                    else setOrdersOpen(true);
+                                }}
+                                aria-label="My orders"
+                                className="!rounded-xl"
+                            >
+                                Previous orders
+                            </Button>
+
+                            {/* Cart Button */}
+                            <Button
+                                id="open-cart-btn"
+                                variant="primary"
+                                onClick={() => {
+                                    if (!customer) setCustomerFormOpen(true);
+                                    else setCartOpen(true);
+                                }}
+                                aria-label="Open cart"
+                                className="!rounded-xl relative"
+                            >
+                                <ShoppingCart className="w-5 h-5 mr-2" />
+                                <span className="font-heading">Cart</span>
+                                {totalCartQty > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-white text-cayenne-red-500 text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                                        {totalCartQty}
+                                    </span>
+                                )}
+                            </Button>
+                        </div>
                     </div>
 
                     {/* ── Search + Diet Filter ── */}
@@ -400,4 +415,4 @@ export default function Menu() {
             </Section>
         </>
     );
-}
+})

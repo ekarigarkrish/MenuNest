@@ -20,16 +20,38 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Grid3x3
+  Grid3x3,
+  ChevronDown
 } from "lucide-react";
 
-const navItems = [
+type SubItem = {
+  name: string;
+  href: string;
+};
+
+type NavItemType = {
+  name: string;
+  href?: string;
+  icon: any;
+  subItems?: SubItem[];
+};
+
+const navItems: NavItemType[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
   { name: "Table Management", href: "/admin/table-management", icon: Grid3x3 },
-  { name: "Orders", href: "/admin/order-management", icon: ClipboardList },
+  { name: "Orders", icon: ClipboardList,
+    subItems:[
+      { name: "Order Management", href: "/admin/order-management" },
+      { name: "Order History", href: "/admin/order-history" }
+    ]
+   },
   { name: "Customers", href: "/admin/customers", icon: Users },
-  { name: "Settings", href: "/admin/settings/profile", icon: Settings },
+  { 
+    name: "Settings", 
+    icon: Settings,
+    href: '/admin/settings/general'
+  },
 ];
 
 export default function AdminSidebar() {
@@ -38,8 +60,9 @@ export default function AdminSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const { branding } = useRestaurantBranding();
-  const displayName = branding?.name || "MenuNest";
+  const displayName = branding?.name || "";
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -58,11 +81,23 @@ export default function AdminSidebar() {
     }
   };
 
-  const isLinkActive = (href: string) => {
+  const isLinkActive = (href?: string) => {
+    if (!href) return false;
     if (href === "/admin") {
       return pathname === "/admin";
     }
     return pathname.startsWith(href);
+  };
+
+  const isDropdownActive = (subItems?: SubItem[]) => {
+    if (!subItems) return false;
+    return subItems.some(item => pathname.startsWith(item.href));
+  };
+
+  const handleDropdownClick = (name: string, e: React.MouseEvent, isDesktop: boolean = false) => {
+    e.preventDefault();
+    if (isDesktop && isCollapsed) setIsCollapsed(false);
+    setOpenDropdowns(prev => ({ ...prev, [name]: !prev[name] }));
   };
 
   return (
@@ -153,16 +188,16 @@ export default function AdminSidebar() {
               </div>
 
               {/* Navigation Links */}
-              <nav className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto">
+              <nav className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto scrollbar-hide">
                 {navItems.map((item) => {
                   const Icon = item.icon;
-                  const active = isLinkActive(item.href);
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setIsMobileOpen(false)}
-                      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${active
+                  const hasSubItems = !!item.subItems && item.subItems.length > 0;
+                  const active = isLinkActive(item.href) || isDropdownActive(item.subItems);
+                  const isOpen = openDropdowns[item.name] ?? isDropdownActive(item.subItems);
+
+                  const itemContent = (
+                    <div
+                      className={`relative flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all group w-full ${active
                         ? "text-cayenne-red-600 font-semibold"
                         : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
                         }`}
@@ -174,9 +209,57 @@ export default function AdminSidebar() {
                           transition={{ type: "spring", stiffness: 380, damping: 30 }}
                         />
                       )}
-                      <Icon className={`w-5 h-5 ${active ? "text-cayenne-red-500" : "text-carbon-black-500 group-hover:text-carbon-black-800"}`} />
-                      <span>{item.name}</span>
-                    </Link>
+                      
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-5 h-5 ${active ? "text-cayenne-red-500" : "text-carbon-black-500 group-hover:text-carbon-black-800"}`} />
+                        <span>{item.name}</span>
+                      </div>
+
+                      {hasSubItems && (
+                        <ChevronDown size={16} className={`transition-transform duration-200 text-carbon-black-400 ${isOpen ? 'rotate-180' : ''}`} />
+                      )}
+                    </div>
+                  );
+
+                  return (
+                    <div key={item.name} className="flex flex-col gap-1">
+                      {hasSubItems ? (
+                        <button type="button" className="w-full text-left" onClick={(e) => handleDropdownClick(item.name, e)}>
+                          {itemContent}
+                        </button>
+                      ) : (
+                        <Link href={item.href!} onClick={() => setIsMobileOpen(false)}>
+                          {itemContent}
+                        </Link>
+                      )}
+
+                      <AnimatePresence>
+                        {hasSubItems && isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="ml-9 pl-3 border-l-2 border-carbon-black-100 space-y-1 mt-1 mb-2">
+                              {item.subItems!.map(subItem => {
+                                const isSubActive = isLinkActive(subItem.href);
+                                return (
+                                  <Link
+                                    key={subItem.name}
+                                    href={subItem.href}
+                                    onClick={() => setIsMobileOpen(false)}
+                                    className={`block px-3 py-2.5 text-sm rounded-lg transition-colors ${isSubActive ? "text-cayenne-red-600 bg-cayenne-red-50 font-medium" : "text-carbon-black-600 hover:text-carbon-black-900 hover:bg-carbon-black-50"}`}
+                                  >
+                                    {subItem.name}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   );
                 })}
               </nav>
@@ -237,6 +320,7 @@ export default function AdminSidebar() {
                 </div>
               )}
             </div>
+            
             {!isCollapsed && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -256,15 +340,16 @@ export default function AdminSidebar() {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 py-8 px-4 space-y-1.5">
+        <nav className="flex-1 py-8 px-4 space-y-1.5 overflow-y-auto scrollbar-hide">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = isLinkActive(item.href);
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${active
+            const hasSubItems = !!item.subItems && item.subItems.length > 0;
+            const active = isLinkActive(item.href) || isDropdownActive(item.subItems);
+            const isOpen = openDropdowns[item.name] ?? isDropdownActive(item.subItems);
+
+            const itemContent = (
+              <div
+                className={`relative flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all group w-full cursor-pointer ${active
                   ? "text-cayenne-red-400 font-semibold"
                   : "text-carbon-black-600 hover:bg-carbon-black-50 hover:text-carbon-black-900"
                   }`}
@@ -277,25 +362,74 @@ export default function AdminSidebar() {
                   />
                 )}
 
-                <Icon className={`w-5 h-5 shrink-0 transition-colors ${active ? "text-cayenne-red-500" : "text-carbon-black-500 group-hover:text-carbon-black-800"}`} />
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-5 h-5 shrink-0 transition-colors ${active ? "text-cayenne-red-500" : "text-carbon-black-500 group-hover:text-carbon-black-800"}`} />
 
-                {!isCollapsed ? (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="whitespace-nowrap"
-                  >
-                    {item.name}
-                  </motion.span>
-                ) : (
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="whitespace-nowrap"
+                    >
+                      {item.name}
+                    </motion.span>
+                  )}
+                </div>
+
+                {!isCollapsed && hasSubItems && (
+                  <ChevronDown size={16} className={`shrink-0 transition-transform duration-200 text-carbon-black-400 ${isOpen ? 'rotate-180' : ''}`} />
+                )}
+
+                {isCollapsed && (
                   // Custom Hover Tooltip in collapsed mode
                   <div className="absolute left-full ml-4 px-3 py-1.5 bg-carbon-black-900 text-white text-xs font-semibold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-1 group-hover:translate-x-0 z-50">
                     {item.name}
                   </div>
                 )}
-              </Link>
+              </div>
+            );
+
+            return (
+              <div key={item.name} className="flex flex-col gap-1">
+                {hasSubItems ? (
+                  <button type="button" className="w-full text-left outline-none" onClick={(e) => handleDropdownClick(item.name, e, true)}>
+                    {itemContent}
+                  </button>
+                ) : (
+                  <Link href={item.href!} onClick={() => setIsMobileOpen(false)}>
+                    {itemContent}
+                  </Link>
+                )}
+
+                <AnimatePresence>
+                  {!isCollapsed && hasSubItems && isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="ml-9 pl-3 border-l-2 border-carbon-black-100 space-y-1 mt-1 mb-2">
+                        {item.subItems!.map(subItem => {
+                          const isSubActive = isLinkActive(subItem.href);
+                          return (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              onClick={() => setIsMobileOpen(false)}
+                              className={`block px-3 py-2 text-sm rounded-lg transition-colors ${isSubActive ? "text-cayenne-red-600 bg-cayenne-red-50 font-medium" : "text-carbon-black-600 hover:text-carbon-black-900 hover:bg-carbon-black-50"}`}
+                            >
+                              {subItem.name}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             );
           })}
         </nav>
