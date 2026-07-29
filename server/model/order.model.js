@@ -39,6 +39,21 @@ const orderModel = sequelize.define("orders", {
         allowNull: false,
         defaultValue: 0
     },
+    tax:{
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    gst_type:{
+        type: DataTypes.STRING,
+        defaultValue:'',
+        allowNull: true
+    },
+    gst_rate:{
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue:0,
+        allowNull: true
+    },
     order: {
         type: DataTypes.JSON,
         allowNull: false,

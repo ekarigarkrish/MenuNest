@@ -50,6 +50,11 @@ const menuItemModel = sequelize.define("menuItems", {
         allowNull: false,
         defaultValue: false
     },
+    isBerverage:{
+        type:DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
     isFeatured:{
         type:DataTypes.BOOLEAN,
         allowNull: false,

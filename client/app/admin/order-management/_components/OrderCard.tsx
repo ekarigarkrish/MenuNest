@@ -94,7 +94,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
               variant="primary"
               size="sm"
               className="w-full bg-emerald-500 hover:bg-emerald-600 focus-visible:ring-emerald-500"
-              onClick={() => onStatusChange(order.id, "served")}
+              onClick={() => onStatusChange(order.id, "completed")}
               rightIcon={<ChevronRight className="w-4 h-4" />}
             >
               Serve Order
@@ -113,7 +113,24 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -2 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
+      className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow"
+      draggable
+      onDragStart={((e: React.DragEvent<HTMLDivElement>) => {
+        e.dataTransfer.setData("orderId", order.id);
+        e.dataTransfer.setData("sourceStatus", order.status);
+        e.dataTransfer.effectAllowed = "move";
+        // Ensure the drag preview looks good by keeping opacity
+        setTimeout(() => {
+          if (e.target instanceof HTMLElement) {
+            e.target.style.opacity = '0.5';
+          }
+        }, 0);
+      }) as any}
+      onDragEnd={((e: React.DragEvent<HTMLDivElement>) => {
+        if (e.target instanceof HTMLElement) {
+          e.target.style.opacity = '1';
+        }
+      }) as any}
     >
       <div className="p-4 flex-1">
         {
@@ -155,6 +172,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
             </div>
           ))}
         </div>
+
       </div>
 
       <div className="bg-gray-50 p-4 border-t border-gray-100">

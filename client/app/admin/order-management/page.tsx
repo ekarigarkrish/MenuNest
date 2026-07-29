@@ -140,7 +140,7 @@ export default function AdminOrderManagementPage() {
       ) : status === "error" ? (
         <div className="flex justify-center items-center h-full text-red-500">Error loading orders</div>
       ) : (
-        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto scrollbar-hide">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6 flex-1">
             <OrderColumn
               title="New Orders"
@@ -150,6 +150,7 @@ export default function AdminOrderManagementPage() {
               icon={<Clock className="w-5 h-5" />}
               colorClass="text-amber-600 bg-amber-100/50 p-1.5 rounded-md"
             />
+            
             <OrderColumn
               title="In Kitchen"
               status={["accepted", "preparing"]}
@@ -158,6 +159,7 @@ export default function AdminOrderManagementPage() {
               icon={<ChefHat className="w-5 h-5" />}
               colorClass="text-indigo-600 bg-indigo-100/50 p-1.5 rounded-md"
             />
+
             <OrderColumn
               title="Ready to Serve"
               status={["ready"]}
@@ -166,14 +168,16 @@ export default function AdminOrderManagementPage() {
               icon={<BellRing className="w-5 h-5" />}
               colorClass="text-emerald-600 bg-emerald-100/50 p-1.5 rounded-md"
             />
+
             <OrderColumn
               title="Served"
-              status={["served"]}
+              status={["served", "completed"]}
               orders={filteredOrders}
               onStatusChange={updateOrderStatus}
               icon={<CheckCircle2 className="w-5 h-5" />}
               colorClass="text-blue-600 bg-blue-100/50 p-1.5 rounded-md"
             />
+
             <OrderColumn
               title="Cancelled"
               status={["cancelled"]}

@@ -36,6 +36,7 @@ export default React.memo(function CartDrawer({
     onIncrease,
     onDecrease,
     onRemove,
+    onCustomerFormOpen,
     onClearCart,
 }: {
     storage: any,
@@ -44,6 +45,7 @@ export default React.memo(function CartDrawer({
     onIncrease: (id: string) => void;
     onDecrease: (id: string) => void;
     onRemove: (id: string) => void;
+    onCustomerFormOpen?: () => void;
     onClearCart?: () => void;
 }) {
     const searchParams = useSearchParams();
@@ -52,10 +54,6 @@ export default React.memo(function CartDrawer({
     const isOnlinePaymentSuccess = searchParams.get("success")
     const { socket } = useSocket()
     const subtotal = cart.reduce((acc, i) => acc + i.discountPrice * i.qty, 0);
-    // console.log(taxCulculation(subtotal));
-
-    // const tax = Math.round(subtotal * 0.05);
-    // const total = subtotal + tax;
     const { total, tax, gst_rate, gst_type } = taxCulculation(subtotal)
     const itemCount = cart.reduce((a, i) => a + i.qty, 0);
 
@@ -77,6 +75,11 @@ export default React.memo(function CartDrawer({
     const handleError = (data: any) => {
         setIsPlacing(false);
         toast.error(data.message || "Something went wrong.");
+        if (!data.isphoneExist) {
+            onClose();
+            setIsPlacing(false)
+            onCustomerFormOpen?.() // close cart & open customer modal
+        }
     };
 
     useEffect(() => {
@@ -103,7 +106,12 @@ export default React.memo(function CartDrawer({
 
         if (isOnlinePaymentSuccess == "true" && cart.length > 0) {
             const urlOrderId = searchParams.get('order_id');
-            socket.emit('place_order', { cart, total, tableToken, ...storage.getDetails(), orderId: urlOrderId, paymentMode: 'online' })
+            socket.emit('place_order', {
+                cart, tax, gst_type, gst_rate, total, tableToken,
+                ...storage.getDetails(),
+                orderId: urlOrderId,
+                paymentMode: 'online'
+            })
             setIsOrderPlaced(true);
             onClearCart?.();
         }
