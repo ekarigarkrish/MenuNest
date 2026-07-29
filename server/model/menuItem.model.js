@@ -50,7 +50,7 @@ const menuItemModel = sequelize.define("menuItems", {
         allowNull: false,
         defaultValue: false
     },
-    isBerverage:{
+    isBeverage:{
         type:DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false

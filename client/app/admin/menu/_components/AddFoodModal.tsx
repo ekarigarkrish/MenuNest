@@ -30,14 +30,15 @@ const schema = yup
     isAvailable: yup.boolean().default(true),
     isFeatured: yup.boolean().default(false),
     isVegetarian: yup.boolean().default(false),
+    isBeverage: yup.boolean().default(false),
     image: yup.mixed<any>().nullable().optional(),
   });
 
 type FormData = yup.InferType<typeof schema>;
 
 // --- Helper Components ---
-const ToggleField = ({ control, name, label, description, colorClass = "peer-checked:bg-cayenne-red-500" }: any) => (
-  <div className="flex items-center justify-between">
+const ToggleField = ({ disabled, onchange, control, name, label, description, colorClass = "peer-checked:bg-cayenne-red-500" }: any) => (
+  <div className={`flex items-center justify-between ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
     <div>
       <p className="font-medium text-sm text-gray-900">{label}</p>
       <p className="text-xs text-gray-500">{description}</p>
@@ -51,7 +52,11 @@ const ToggleField = ({ control, name, label, description, colorClass = "peer-che
             type="checkbox"
             className="sr-only peer"
             checked={field.value}
-            onChange={(e) => field.onChange(e.target.checked)}
+            disabled={disabled}
+            onChange={(e) => {
+              field.onChange(e.target.checked)
+              onchange?.()
+            }}
           />
           <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${colorClass}`} />
         </label>
@@ -100,20 +105,21 @@ const InputField = ({ control, name, label, error, type = "text", placeholder, p
 );
 
 export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onClose, initialData }: AddFoodModalProps) {
-  const defaultValues :any = {
-      name: "",
-      slug: "",
-      categoryId: activeCategoryId || "",
-      price: undefined,
-      discount: undefined,
-      discountPrice: undefined,
-      prepTime: undefined,
-      description: "",
-      isAvailable: true,
-      isFeatured: false,
-      isVegetarian: false,
-      image: null,
-    }
+  const defaultValues: any = {
+    name: "",
+    slug: "",
+    categoryId: activeCategoryId || "",
+    price: undefined,
+    discount: undefined,
+    discountPrice: undefined,
+    prepTime: undefined,
+    description: "",
+    isAvailable: true,
+    isFeatured: false,
+    isVegetarian: false,
+    isBeverage: false,
+    image: null,
+  }
   const { control, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: yupResolver(schema),
     defaultValues,
@@ -121,6 +127,14 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
 
   const price = watch("price");
   const discount = watch("discount");
+  const isBeverage = watch("isBeverage");
+
+  // Reset isVegetarian when isBeverage is true
+  useEffect(() => {
+    if (isBeverage) {
+      setValue("isVegetarian", false);
+    }
+  }, [isBeverage, setValue]);
 
   // Auto-calculate discount price
   useEffect(() => {
@@ -149,6 +163,7 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
           isAvailable: initialData.isAvailable ?? true,
           isFeatured: initialData.isFeatured ?? false,
           isVegetarian: initialData.isVeg ?? false,
+          isBeverage: initialData.isBeverage ?? false,
           image: initialData.image || null,
         });
       } else {
@@ -171,10 +186,12 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
       append("discount", data.discount);
       append("discountPrice", data.discountPrice);
       append("preparationTime", data.prepTime);
+      append("isBeverage", data.isBeverage);
       append("description", data.description);
       append("isAvailable", data.isAvailable);
       append("isFeatured", data.isFeatured);
       append("isVeg", data.isVegetarian);
+
       if (data.image instanceof File) {
         formData.append("image", data.image);
       } else if (!data.image && initialData?.image) {
@@ -182,15 +199,10 @@ export default React.memo(function AddFoodModal({ activeCategoryId, isOpen, onCl
       }
 
       const res = initialData?.id
-        ? await Fetch.put(`/api/menu/${initialData.id}`, formData, {
-          withCredentials: true,
-          withXSRFToken: true,
-        })
-        : await Fetch.post("/api/menu/create", formData, {
-          withCredentials: true,
-          withXSRFToken: true,
-        });
-      return res.data;
+        ? await Fetch.put(`/api/menu/${initialData.id}`, formData, { withCredentials: true, withXSRFToken: true, })
+        : await Fetch.post("/api/menu/create", formData, { withCredentials: true, withXSRFToken: true, });
+      return res.data
+
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["menu-items"] });

@@ -58,7 +58,7 @@ export default {
         limit = parseInt(limit) || 10;
         const offset = (page - 1) * limit;
 
-        const whereClause = {};
+        const whereClause = { isAvailable: true };
         if (search) {
             whereClause.name = { [Op.like]: `%${search}%` };
         }
@@ -102,7 +102,7 @@ export default {
         const {
             name, slug, description, price, discount,
             discountPrice, categoryId, preparationTime,
-            isVeg, isFeatured, isAvailable
+            isVeg, isFeatured,isBeverage, isAvailable
         } = req.body;
 
         const isExist = await menuItemModel.findOne({ where: { slug } });
@@ -122,6 +122,7 @@ export default {
             preparationTime: parseInt(preparationTime) || 0,
             isVeg: isVeg === 'true' || isVeg === true,
             isFeatured: isFeatured === 'true' || isFeatured === true,
+            isBeverage: isBeverage === 'true' || isBeverage === true,
             isAvailable: isAvailable !== undefined ? (isAvailable === 'true' || isAvailable === true) : true,
             image: req.file?.path ?? null,
         });
@@ -168,7 +169,7 @@ export default {
         const {
             name, slug, description, price, discount,
             discountPrice, categoryId, preparationTime,
-            isVeg, isFeatured, isAvailable, removeImage
+            isVeg, isFeatured, isAvailable, isBeverage, removeImage
         } = req.body;
 
         const menuItem = await menuItemModel.findByPk(id);
@@ -207,6 +208,7 @@ export default {
             categoryId: categoryId ?? menuItem.categoryId,
             preparationTime: preparationTime !== undefined ? parseInt(preparationTime) : menuItem.preparationTime,
             isVeg: isVeg !== undefined ? (isVeg === 'true' || isVeg === true) : menuItem.isVeg,
+            isBeverage: isBeverage !== undefined ? (isBeverage === 'true' || isBeverage === true) : menuItem.isBeverage,
             isFeatured: isFeatured !== undefined ? (isFeatured === 'true' || isFeatured === true) : menuItem.isFeatured,
             isAvailable: isAvailable !== undefined ? (isAvailable === 'true' || isAvailable === true) : menuItem.isAvailable,
             image: imageValue,
