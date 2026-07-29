@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Star, Clock, Plus, Minus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import VegBadge from "./VegBadge";
+import { motion } from "framer-motion";
 
- type FoodItem = {
+type FoodItem = {
     id: string;
     name: string;
     description: string;
@@ -14,29 +15,34 @@ import VegBadge from "./VegBadge";
     prepTime: string;
     isVeg: boolean;
     isBestSeller?: boolean;
+    isBeverage?: boolean;
     image: string;
 };
 
-
-export default React.memo(function FoodCard({
-    item,
-    onAdd,
-    cartQty,
-    onIncrease,
-    onDecrease,
-}: {
+export default React.memo(function FoodCard({ item, onAdd, cartQty, onIncrease, onDecrease }: {
     item: FoodItem;
     onAdd: (item: FoodItem) => void;
     cartQty: number;
     onIncrease: (id: string) => void;
     onDecrease: (id: string) => void;
 }) {
+
     return (
-        <article className="bg-white rounded-2xl border border-carbon-black-100 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full">
+        <article
+            className="bg-white rounded-2xl border border-carbon-black-100 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full"
+        >
             {/* Image or Emoji */}
             <div className="relative bg-gradient-to-br from-orange-50 to-cayenne-red-50 h-32 sm:h-36 md:h-40 flex items-center justify-center text-5xl sm:text-6xl flex-shrink-0">
-                {item.image && (item.image.startsWith('http') || item.image.startsWith('/')) ? (
-                    <Image src={item.image} alt={item.name} fill className="object-cover" loading="eager" />
+                {item.image ? (
+                    <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        loading="eager"
+                        priority={true}
+                        className={`object-cover transition-opacity duration-300`}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
                 ) : (
                     item.image || "🍽️"
                 )}
@@ -53,7 +59,11 @@ export default React.memo(function FoodCard({
                     <h3 className="font-heading font-bold text-carbon-black-900 text-sm sm:text-base leading-snug line-clamp-1 flex-1">
                         {item.name}
                     </h3>
-                    <VegBadge isVeg={item.isVeg} />
+                    {
+                        !item.isBeverage && (
+                            <VegBadge isVeg={item.isVeg} />
+                        )
+                    }
                 </div>
 
                 <p className="text-carbon-black-500 text-[11px] sm:text-xs leading-relaxed line-clamp-2 flex-1">

@@ -107,6 +107,7 @@ export default React.memo(function Menu() {
             prepTime: item.preparationTime ? `${item.preparationTime} mins` : "15 mins",
             isVeg: item.isVeg,
             isBestSeller: item.isFeatured,
+            isBeverage: item.isBeverage,
             image: item.image || "🍽️",
         }));
     }, [menuItemsResponse]);
