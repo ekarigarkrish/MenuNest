@@ -15,4 +15,6 @@ router.post('/customer/orders', isCustomerAuthenticated, orderController.getCust
 
 router.get('/:id/receipt', isCustomerAuthenticated, orderController.getReceipt)
 
+router.get('/:id/invoice', isAuthenticated('admin'), orderController.getReceipt)
+
 export default router

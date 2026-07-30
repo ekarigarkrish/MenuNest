@@ -1,5 +1,6 @@
 import { asyncHandler, ApiError } from '../utils/helper.utils.js'
 import restaurantModel from '../model/restaurant.model.js'
+import userModel from '../model/user.model.js'
 import { deleteFile } from '../utils/removeFile.utils.js'
 
 // Singleton ID — the app always has exactly one restaurant record
@@ -24,13 +25,12 @@ export default {
 
     getRestaurant: asyncHandler(async (req, res) => {
         const restaurant = await getOrCreateRestaurant()
-
         const plain = restaurant.get({ plain: true })
+   
         if (plain.logo) {
             plain.logo = `${req.protocol}://${req.get('host')}/${plain.logo}`
         }
         plain.gst_rate = parseFloat(plain.gst_rate)
-        // console.log(plain);
 
         return res.status(200).json({ success: true, restaurant: plain })
     }, 'getRestaurant'),

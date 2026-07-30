@@ -8,7 +8,8 @@ import {
     ChevronLeft,
     ChevronRight,
     ShoppingBag,
-    Loader2
+    Loader2,
+    Printer
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import DatePicker, { DateRange } from "@/components/ui/DatePicker";
@@ -112,6 +113,51 @@ export default function OrderHistoryPage() {
         });
     }
 
+    const printReceipt = async (orderId: string) => {
+        try {
+            toast.loading("Generating invoice for printing...", { id: `print-${orderId}` });
+            const res = await Fetch.get(`/api/order/${orderId}/invoice`, {
+                withCredentials: true,
+                withXSRFToken: true,
+                responseType: 'blob'
+            });
+
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            
+            iframe.onload = () => {
+                setTimeout(() => {
+                    iframe.contentWindow?.focus();
+                    iframe.contentWindow?.print();
+                    // Revoke URL after a delay to ensure print dialog has loaded the document
+                    setTimeout(() => {
+                        window.URL.revokeObjectURL(url);
+                    }, 10000);
+                }, 200);
+            };
+
+            toast.success("Invoice ready for printing", { id: `print-${orderId}` });
+        } catch (error: any) {
+            console.error("Print error:", error);
+            if (error.response?.data instanceof Blob) {
+                const text = await error.response.data.text();
+                try {
+                    const errorData = JSON.parse(text);
+                    toast.error(errorData.message || "Failed to print receipt", { id: `print-${orderId}` });
+                } catch (e) {
+                    toast.error("Failed to print receipt", { id: `print-${orderId}` });
+                }
+            } else {
+                toast.error(error?.response?.data?.message || "Failed to print receipt", { id: `print-${orderId}` });
+            }
+        }
+    }
+
     return (
         <div className="w-full max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-8">
             {/* Header Section */}
@@ -164,6 +210,7 @@ export default function OrderHistoryPage() {
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Status</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -237,6 +284,12 @@ export default function OrderHistoryPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {formatDate(order.createdAt)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <Button size="sm" variant="outline" disabled={(order.paymentStatus).toLowerCase() !== 'paid'} onClick={() => printReceipt(order.id)} className="flex items-center gap-1.5 text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border-gray-200">
+                                                <Printer className="w-4 h-4" />
+                                                Print
+                                            </Button>
                                         </td>
                                     </motion.tr>
                                 ))
