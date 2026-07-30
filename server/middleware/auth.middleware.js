@@ -17,9 +17,9 @@ export const isAuthenticated = (roles = []) => {
 
         try {
             const decoded = decryptToken(token);
-            
+
             // Check if user's role is allowed (if roles were specified)
-            if (roles.length > 0 && !roles.includes(decoded.role)) {
+            if (roles.length > 0 && !roles.includes(decoded.role) && decoded.role ) {
                 throw ApiError(`Role (${decoded.role}) is not allowed to access this resource`, 403);
             }
 
@@ -32,3 +32,24 @@ export const isAuthenticated = (roles = []) => {
         }
     }, 'authMiddleware => isAuthenticated');
 };
+
+export const isCustomerAuthenticated = asyncHandler(async (req, res, next) => {
+    let token = req.cookies?.['customer-token'];
+
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+        throw ApiError('Not authorized, no customer token provided', 401);
+    }
+
+    try {
+        const decoded = decryptToken(token);
+        
+        req.customer = decoded;
+        next();
+    } catch (error) {
+        throw ApiError('Not authorized, customer token failed or expired', 401);
+    }
+}, 'authMiddleware => isCustomerAuthenticated');

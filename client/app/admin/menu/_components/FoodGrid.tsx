@@ -116,11 +116,7 @@ export default React.memo(function FoodGrid({
             </Button>
           </motion.div>
         ) : (
-          <motion.div
-            layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 sm:gap-6"
-          >
-            <AnimatePresence initial={false} mode="popLayout">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 sm:gap-6">
               {activeCategoryFoods.map((food) => (
                 <motion.div
                   layout
@@ -195,14 +191,13 @@ export default React.memo(function FoodGrid({
                   </div>
                 </motion.div>
               ))}
-            </AnimatePresence>
-          </motion.div>
+          </div>
         )}
-        
+
         {hasNextPage && (
           <div className="flex justify-center mt-8 pb-8">
-            <Button 
-              onClick={() => fetchNextPage()} 
+            <Button
+              onClick={() => fetchNextPage()}
               disabled={isFetchingNextPage}
               variant="outline"
               className="rounded-xl border-gray-300 text-gray-700 hover:bg-gray-50"
