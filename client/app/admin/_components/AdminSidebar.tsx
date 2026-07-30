@@ -340,7 +340,7 @@ export default function AdminSidebar() {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 py-8 px-4 space-y-1.5 overflow-y-auto scrollbar-hide">
+        <nav className={`flex-1 py-6 px-4 space-y-1.5 scrollbar-hide ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const hasSubItems = !!item.subItems && item.subItems.length > 0;
@@ -384,7 +384,7 @@ export default function AdminSidebar() {
 
                 {isCollapsed && (
                   // Custom Hover Tooltip in collapsed mode
-                  <div className="absolute left-full ml-4 px-3 py-1.5 bg-carbon-black-900 text-white text-xs font-semibold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-1 group-hover:translate-x-0 z-50">
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 bg-carbon-black-900 text-white text-xs font-semibold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-1 group-hover:translate-x-0 z-50">
                     {item.name}
                   </div>
                 )}
@@ -436,8 +436,8 @@ export default function AdminSidebar() {
 
         {/* Profile Footer */}
         <div className="p-4 border-t border-carbon-black-100 bg-carbon-black-50/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 overflow-hidden">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center flex-col gap-3' : 'justify-between'}`}>
+            <div className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'w-full justify-center' : ''}`}>
               <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-tr from-cayenne-red-500/10 to-orange-500/10 text-cayenne-red-600 border border-cayenne-red-100 flex items-center justify-center font-bold font-heading">
                 AD
               </div>
@@ -460,25 +460,25 @@ export default function AdminSidebar() {
                 size="icon"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="h-8 w-8 text-carbon-black-500 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-8 w-8 text-carbon-black-500 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-lg disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 aria-label="Sign out"
               >
                 <LogOut className="w-4 h-4" />
               </Button>
             ) : (
               // Collapsed state LogOut with tooltip
-              <div className="group relative">
+              <div className="group relative flex items-center justify-center w-full">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="h-8 w-8 text-carbon-black-500 hover:text-red-600 hover:bg-red-50 border border-transparent rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-8 w-8 text-carbon-black-500 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Sign out"
                 >
                   <LogOut className="w-4 h-4" />
                 </Button>
-                <div className="absolute left-full ml-4 px-3 py-1.5 bg-carbon-black-900 text-white text-xs font-semibold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-1 group-hover:translate-x-0 z-50">
+                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 bg-carbon-black-900 text-white text-xs font-semibold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-1 group-hover:translate-x-0 z-50">
                   {isLoggingOut ? 'Signing out…' : 'Sign Out'}
                 </div>
               </div>
@@ -489,4 +489,3 @@ export default function AdminSidebar() {
     </>
   );
 }
-

@@ -171,7 +171,7 @@ export default function AdminOrderManagementPage() {
 
             <OrderColumn
               title="Served"
-              status={["served", "completed"]}
+              status={["completed"]}
               orders={filteredOrders}
               onStatusChange={updateOrderStatus}
               icon={<CheckCircle2 className="w-5 h-5" />}

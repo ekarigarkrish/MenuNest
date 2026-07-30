@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronRight, ArrowLeft, Phone, User, Loader2 } from "lucide-react";
+import { ChevronRight, Phone, User, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
@@ -39,10 +39,10 @@ export default React.memo(function CustomerDetailsForm({
                 setIsLoading(true);
                 const res = await Fetch.post('/api/customer/check', { phone }, { withCredentials: true, withXSRFToken: true });
                 if (res.data.success && res.data.exists) {
-                    onSubmit({ 
-                        phone: res.data.customer.phone, 
-                        firstName: res.data.customer.firstName, 
-                        lastName: res.data.customer.lastName 
+                    onSubmit({
+                        phone: res.data.customer.phone,
+                        firstName: res.data.customer.firstName,
+                        lastName: res.data.customer.lastName
                     });
                     onClose();
                 } else {

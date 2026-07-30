@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Search, ShoppingCart, Flame, Leaf } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { Search, ShoppingCart, Flame, Leaf, History, User, Menu as MenuIcon } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import CartDrawer from "./_components/CartDrawer";
 import OrdersDrawer from "./_components/OrdersDrawer";
 import FoodCard from "./_components/FoodCard";
 import CustomerDetailsForm, { CustomerDetails } from "./_components/CustomerDetailsForm";
+import UpdateCustomerDetailsForm from "./_components/UpdateCustomerDetailsForm";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Fetch } from "@/config/axios.config";
 import Image from "next/image";
@@ -63,8 +64,23 @@ export default React.memo(function Menu() {
     const [cartOpen, setCartOpen] = useState(false);
     const [ordersOpen, setOrdersOpen] = useState(false);
     const [customerFormOpen, setCustomerFormOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [customer, setCustomer] = useState<CustomerDetails | null>(null);
     const [dietFilter, setDietFilter] = useState<"all" | "veg" | "non-veg">("all");
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const { data: categoriesResponse, isLoading: isCategoriesLoading } = useQuery({
         queryKey: ["public-categories"],
@@ -75,16 +91,46 @@ export default React.memo(function Menu() {
     });
 
     const observerTarget = useRef<HTMLDivElement>(null);
+    const categoryScrollRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+
+    const onMouseDown = (e: React.MouseEvent) => {
+        if (!categoryScrollRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - categoryScrollRef.current.offsetLeft);
+        setScrollLeft(categoryScrollRef.current.scrollLeft);
+    };
+
+    const onMouseLeave = () => {
+        setIsDragging(false);
+    };
+
+    const onMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const onMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !categoryScrollRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - categoryScrollRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        categoryScrollRef.current.scrollLeft = scrollLeft - walk;
+    };
 
     const { data: menuItemsResponse, isLoading: isMenuItemsLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         queryKey: ["public-menu-items", activeCategory, search, dietFilter],
         queryFn: async ({ pageParam = 1 }) => {
-            const params = new URLSearchParams();
-            params.append("page", pageParam.toString());
-            params.append("limit", "12");
-            if (activeCategory !== "all") params.append("categoryId", activeCategory);
-            if (search) params.append("search", search);
-            if (dietFilter !== "all") params.append("isVeg", dietFilter === "veg" ? "true" : "false");
+            const params = new URLSearchParams({
+                page: String(pageParam),
+                limit: "12",
+                ...(activeCategory !== "all" && { categoryId: activeCategory }),
+                ...(search && { search: search.trim() }),
+                ...(dietFilter !== "all" && {
+                    isVeg: String(dietFilter === "veg"),
+                }),
+            });
 
             const res = await Fetch.get(`/api/menu/public/all?${params.toString()}`);
             return res.data;
@@ -220,7 +266,17 @@ export default React.memo(function Menu() {
                 onSubmit={(details) => {
                     setCustomer(details);
                     storage.setDetails(details)
-                    setCartOpen(true);
+                    cart.length > 0 && setCartOpen(true);
+                }}
+            />
+
+            <UpdateCustomerDetailsForm
+                isOpen={profileOpen}
+                onClose={() => setProfileOpen(false)}
+                customer={customer}
+                onSubmit={(details) => {
+                    setCustomer(details);
+                    storage.setDetails(details);
                 }}
             />
 
@@ -240,19 +296,60 @@ export default React.memo(function Menu() {
                             </h1>
                         </div>
 
-                        <div className="flex gap-4 justify-between">
-                            <Button
-                                id="my-orders-btn"
-                                variant="primary"
-                                onClick={() => {
-                                    if (!customer) setCustomerFormOpen(true);
-                                    else setOrdersOpen(true);
-                                }}
-                                aria-label="My orders"
-                                className="!rounded-xl"
-                            >
-                                Previous orders
-                            </Button>
+                        <div className="flex gap-4 justify-between items-center">
+                            {/* Account Dropdown */}
+                            <div className="relative" ref={dropdownRef}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                                    className="!rounded-xl flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 hover:bg-carbon-black-50 transition"
+                                    aria-label="Account menu"
+                                >
+                                    <MenuIcon className="w-5 h-5 text-carbon-black-700" />
+                                    <span className="font-heading hidden sm:inline-block text-carbon-black-800">Account</span>
+                                </Button>
+
+                                <AnimatePresence>
+                                    {dropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            transition={{ duration: 0.15 }}
+                                            className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-carbon-black-100 p-2 z-50 flex flex-col gap-1"
+                                        >
+                                            <Button
+                                                id="my-profile-btn"
+                                                variant="ghost"
+                                                aria-label="My Profile"
+                                                onClick={() => {
+                                                    setDropdownOpen(false);
+                                                    if (!customer) setCustomerFormOpen(true);
+                                                    else setProfileOpen(true);
+                                                }}
+                                                className="!rounded-lg !justify-start w-full relative flex items-center text-carbon-black-700 hover:bg-carbon-black-50 hover:text-cayenne-red-600 transition-colors py-2"
+                                            >
+                                                <User className="w-4 h-4 mr-3" />
+                                                <span className="font-heading font-medium text-sm">Profile</span>
+                                            </Button>
+                                            <Button
+                                                id="my-orders-btn"
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    setDropdownOpen(false);
+                                                    if (!customer) setCustomerFormOpen(true);
+                                                    else setOrdersOpen(true);
+                                                }}
+                                                aria-label="My orders"
+                                                className="!rounded-lg !justify-start w-full relative flex items-center text-carbon-black-700 hover:bg-carbon-black-50 hover:text-cayenne-red-600 transition-colors py-2"
+                                            >
+                                                <History className="w-4 h-4 mr-3" />
+                                                <span className="font-heading font-medium text-sm">Orders</span>
+                                            </Button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
 
                             {/* Cart Button */}
                             <Button
@@ -263,10 +360,10 @@ export default React.memo(function Menu() {
                                     else setCartOpen(true);
                                 }}
                                 aria-label="Open cart"
-                                className="!rounded-xl relative"
+                                className="!rounded-xl relative flex items-center"
                             >
-                                <ShoppingCart className="w-5 h-5 mr-2" />
-                                <span className="font-heading">Cart</span>
+                                <ShoppingCart className="w-5 h-5 sm:mr-2" />
+                                <span className="font-heading hidden sm:inline-block">Cart</span>
                                 {totalCartQty > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-white text-cayenne-red-500 text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
                                         {totalCartQty}
@@ -316,8 +413,15 @@ export default React.memo(function Menu() {
                         </div>
                     </div>
 
-                    {/* ── Category Tabs ── */}
-                    <div className="flex gap-2 overflow-x-auto pb-3 mb-8 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+                    {/* ── Categories ── */}
+                    <div
+                        ref={categoryScrollRef}
+                        onMouseDown={onMouseDown}
+                        onMouseLeave={onMouseLeave}
+                        onMouseUp={onMouseUp}
+                        onMouseMove={onMouseMove}
+                        className={`flex gap-2 overflow-x-auto pb-3 mb-8 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-nowrap select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+                    >
                         {isCategoriesLoading ? (
                             <div className="flex gap-2 animate-pulse">
                                 {[1, 2, 3, 4, 5].map((i) => (

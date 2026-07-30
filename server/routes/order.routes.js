@@ -1,6 +1,6 @@
 import express from 'express'
 import orderController from '../controllers/order.controller.js'
-import { isAuthenticated } from '../middleware/auth.middleware.js'
+import { isAuthenticated, isCustomerAuthenticated } from '../middleware/auth.middleware.js'
 const router = express.Router({ caseSensitive: true })
 
 router.get('/get/data', isAuthenticated('admin'), orderController.getliveReceivingData)
@@ -11,8 +11,8 @@ router.patch('/update/status/:id', isAuthenticated('admin'), orderController.upd
 
 router.patch('/update-payment-status/:id', isAuthenticated('admin'), orderController.updatePaymentStatus)
 
-router.post('/customer/orders', orderController.getCustomerOrderHistory)
+router.post('/customer/orders', isCustomerAuthenticated, orderController.getCustomerOrderHistory)
 
-router.get('/:id/receipt', orderController.getReceipt)
+router.get('/:id/receipt', isCustomerAuthenticated, orderController.getReceipt)
 
 export default router

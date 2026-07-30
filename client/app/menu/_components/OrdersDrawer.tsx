@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { X, Clock, CheckCircle2, UtensilsCrossed, ShoppingBag, Loader2, ChefHat, Bell, XCircle, Timer, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
@@ -27,17 +27,13 @@ const getStatusConfig = (status: string) => {
     }
 };
 
-export default React.memo(function OrdersDrawer({
-    onClose,
-    phone
-}: {
+export default React.memo(function OrdersDrawer({ onClose, phone }: {
     onClose: () => void;
     phone?: string;
 }) {
-
     const { targetRef, isIntersecting } = useIntersectionObserver();
 
-    const { data: response, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    const { data: response, refetch, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         queryKey: ['orders', phone],
         queryFn: async ({ pageParam = 1 }) => {
             if (!phone) return null;
@@ -52,6 +48,8 @@ export default React.memo(function OrdersDrawer({
         },
         enabled: !!phone
     });
+
+    React.useEffect(() => { refetch(); }, [])
 
     React.useEffect(() => {
         if (isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -71,16 +69,16 @@ export default React.memo(function OrdersDrawer({
     const downloadReceipt = async (orderId: string) => {
         try {
             toast.loading("Generating invoice...", { id: `download-${orderId}` });
-            const res = await Fetch.get(`/api/order/${orderId}/receipt`, { 
-                withCredentials: true, 
+            const res = await Fetch.get(`/api/order/${orderId}/receipt`, {
+                withCredentials: true,
                 withXSRFToken: true,
-                responseType: 'blob' 
+                responseType: 'blob'
             });
-            
+
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
-            
+
             const contentDisposition = res.headers['content-disposition'];
             let fileName = `receipt-${orderId}.pdf`;
             if (contentDisposition) {
@@ -89,13 +87,13 @@ export default React.memo(function OrdersDrawer({
                     fileName = fileNameMatch[1];
                 }
             }
-            
+
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-            
+
             toast.success("Invoice downloaded successfully", { id: `download-${orderId}` });
         } catch (error: any) {
             console.error("Download error:", error);
@@ -112,6 +110,7 @@ export default React.memo(function OrdersDrawer({
             }
         }
     }
+
     return (
         <>
             {/* Backdrop */}
@@ -211,7 +210,7 @@ export default React.memo(function OrdersDrawer({
                                                 <span className="text-gray-500 font-medium">₹{item.discountPrice * item.qty}</span>
                                             </div>
                                         ))}
-                                        
+
                                         <div className="flex justify-between items-center pt-2 mt-2 border-t border-dashed border-gray-200">
                                             <span className="text-sm text-gray-500">
                                                 Taxes &amp; Charges {order.gst_type === "percentage" ? `(${order.gst_rate || 0}%)` : (order.gst_rate ? `(₹${order.gst_rate})` : '')}
@@ -227,19 +226,23 @@ export default React.memo(function OrdersDrawer({
                                         </span>
                                     </div>
 
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full mt-4 rounded-xl border-gray-200 text-gray-700 bg-gray-50 hover:bg-cayenne-red-50 hover:text-cayenne-red-600 hover:border-cayenne-red-200 transition-all font-semibold flex items-center justify-center gap-2 py-2"
-                                        onClick={()=> downloadReceipt(order.id) }
-                                    >
-                                        <Download className="w-4 h-4" />
-                                        Download Invoice
-                                    </Button>
+                                    {
+                                        order.status === 'completed' && (
+                                            <Button
+                                                variant="outline"
+                                                className="w-full mt-4 rounded-xl border-gray-200 text-gray-700 bg-gray-50 hover:bg-cayenne-red-50 hover:text-cayenne-red-600 hover:border-cayenne-red-200 transition-all font-semibold flex items-center justify-center gap-2 py-2"
+                                                onClick={() => downloadReceipt(order.id)}
+                                            >
+                                                <Download className="w-4 h-4" />
+                                                Download Invoice
+                                            </Button>
+                                        )
+                                    }
                                 </motion.div>
                             );
                         })
                     )}
-                    
+
                     {orders.length > 0 && hasNextPage && (
                         <div ref={targetRef} className="py-4 flex justify-center w-full">
                             {isFetchingNextPage ? (
