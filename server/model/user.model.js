@@ -17,6 +17,11 @@ const userModel = sequelize.define('users', {
         unique: true,
         allowNull: false
     },
+    // status: {
+    //     type: DataTypes.ENUM('active', 'inactive'),
+    //     allowNull: false,
+    //     defaultValue: 'active'
+    // },
     password: {
         type: DataTypes.STRING,
         allowNull: false

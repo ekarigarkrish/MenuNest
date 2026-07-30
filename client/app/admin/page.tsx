@@ -84,13 +84,14 @@ export default function AdminDashboardPage() {
                                 {(error as Error)?.message || "Unknown error occurred."}
                             </p>
                         </div>
-                        <button
+                        <Button
+                            variant="primary"
                             onClick={() => refetch()}
                             className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-cayenne-red-500 text-white rounded-xl hover:bg-cayenne-red-600 transition-colors"
                         >
                             <RefreshCw className="w-4 h-4" />
                             Try Again
-                        </button>
+                        </Button>
                     </div>
                 </Section>
             </Container>

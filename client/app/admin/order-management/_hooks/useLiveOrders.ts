@@ -53,28 +53,23 @@ export function useLiveOrders() {
         status: socketData.order.status,
         items: socketData.order.items,
         totalAmount: socketData.total,
-        createdAt: socketData.order.createdAt || new Date().toISOString(),
+        createdAt: socketData.order.createdAt,
       };
 
       queryClient.setQueryData(["orders"], (oldData: any) => {
         if (!oldData) return oldData;
         const newPages = [...oldData.pages];
-        if (newPages.length > 0) {
-          newPages[0] = {
-            ...newPages[0],
-            data: [newOrder, ...newPages[0].data],
-          };
-        }
+        if (newPages.length > 0) { newPages[0] = { ...newPages[0], data: [newOrder, ...newPages[0].data], }; }
         return { ...oldData, pages: newPages };
       });
 
       toast.success("New order received!");
-    };
+    }
 
     socket.on("display_orders", handleOrders);
     return () => {
       socket.off("display_orders", handleOrders);
-    };
+    }
   }, [socket, isConnected, queryClient]);
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
@@ -86,12 +81,10 @@ export function useLiveOrders() {
         ...oldData,
         pages: oldData.pages.map((page: any) => ({
           ...page,
-          data: page.data.map((order: Order) =>
-            order.id === orderId ? { ...order, status: newStatus } : order
-          ),
+          data: page.data.map((order: Order) => (order.id === orderId ? { ...order, status: newStatus } : order)),
         })),
-      };
-    });
+      }
+    })
 
     try {
       await Fetch.patch(`/api/order/update/status/${orderId}`, { status: newStatus }, {

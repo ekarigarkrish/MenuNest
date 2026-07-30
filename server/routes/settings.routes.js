@@ -6,7 +6,7 @@ import { isAuthenticated } from '../middleware/auth.middleware.js'
 const router = express.Router({ caseSensitive: true })
 
 // GET restaurant settings
-router.get('/restaurant', isAuthenticated('admin'), settingsController.getRestaurant)
+router.get('/restaurant', settingsController.getRestaurant)
 
 // PUT update restaurant settings (with optional logo upload)
 router.put(
