@@ -280,7 +280,7 @@ export default React.memo(function Menu() {
                 }}
             />
 
-            <Section className="min-h-screen bg-gradient-to-b from-orange-50/60 via-white to-white">
+            <Section className="min-h-screen bg-gradient-to-b from-cayenne-red-50/60 via-white to-white">
                 <Container className="py-8 md:py-12">
 
                     {/* ── Page Header ── */}

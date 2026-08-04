@@ -48,7 +48,7 @@ function StatCard({ icon, title, count, variant }: { icon: React.ReactNode, titl
   const styles = statStyles[variant];
   return (
     <div className={`rounded-lg p-3 border flex items-center gap-3 ${styles.card}`}>
-      <div className={`p-2 rounded-md flex-shrink-0 ${styles.icon}`}>{icon}</div>
+      <div className={`p-2 rounded-md shrink-0 ${styles.icon}`}>{icon}</div>
       <div>
         <p className={`text-xs font-medium uppercase tracking-wider ${styles.title}`}>{title}</p>
         <p className={`text-xl font-bold leading-none mt-1 ${styles.count}`}>{count}</p>
@@ -82,7 +82,7 @@ export default function AdminOrderManagementPage() {
 
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full xl:w-auto">
           {/* Search Bar */}
-          <div className="relative w-full lg:w-64 flex-shrink-0">
+          <div className="relative w-full lg:w-64 shrink-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>

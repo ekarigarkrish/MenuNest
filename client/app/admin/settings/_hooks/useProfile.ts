@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Fetch } from "@/config/axios.config";
 import { toast } from "sonner";
+import { storage } from "@/lib/storage";
 
 export interface UserProfile {
   id: string;
@@ -24,10 +25,7 @@ export function useProfile() {
   const { data, isLoading, isError } = useQuery<UserProfile>({
     queryKey: ["profile"],
     queryFn: async () => {
-      const res = await Fetch.get("/api/profile", {
-        withCredentials: true,
-        withXSRFToken: true,
-      });
+      const res = await Fetch.get("/api/profile", { withCredentials: true, withXSRFToken: true });
       return res.data.user;
     },
     staleTime: 1000 * 60 * 5,
@@ -35,13 +33,11 @@ export function useProfile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (payload: UpdateProfilePayload) => {
-      const res = await Fetch.put("/api/profile", payload, {
-        withCredentials: true,
-        withXSRFToken: true,
-      });
+      const res = await Fetch.put("/api/profile", payload, { withCredentials: true, withXSRFToken: true });
       return res.data;
     },
     onSuccess: (data: any) => {
+      storage.localStorage.set('user', { name: data.user.name })
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success(data.message || "Profile updated successfully!");
     },

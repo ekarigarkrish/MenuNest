@@ -1,8 +1,13 @@
 import React from "react";
 import AdminSidebar from "@/app/admin/_components/AdminSidebar";
+import { useSocket } from "@/hooks/useSocket";
+import OrderMessage from "@/components/ui/OrderMessage";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+      
     return (
+        <>
+            <OrderMessage />
             <div className="flex h-screen overflow-hidden bg-carbon-black-50">
                 <AdminSidebar />
                 
@@ -12,5 +17,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </main>
                 </div>
             </div>
+        </>
     );
 }

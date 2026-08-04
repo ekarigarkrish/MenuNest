@@ -1,7 +1,9 @@
 import { ApiError, asyncHandler, signToken } from "../utils/helper.utils.js";
 import { customerModel, orderModel } from "../model/assoication.js";
 import { Op } from "sequelize";
+import ExcelJS from "exceljs"
 import config from "../config/config.js";
+import { exportExcel } from "../utils/export.utils.js";
 
 export default {
     checkCustomerByPhone: asyncHandler(async (req, res) => {
@@ -121,5 +123,61 @@ export default {
             message: 'Customer updated successfully',
             customer
         });
-    }, 'updateCustomerInfo')
+    }, 'updateCustomerInfo'),
+
+    exportCustomersInfo: asyncHandler(async (req, res) => {
+        const { format, startDate, endDate } = req.query;
+
+        const where = {};
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+
+            if (startDate) {
+                where.createdAt[Op.gte] = new Date(startDate);
+            }
+
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+
+                where.createdAt[Op.lte] = end;
+            }
+        }
+
+        const customers = await customerModel.findAll({
+            where,
+            attributes: ["id", "name", "phone", "createdAt"],
+            order: [["createdAt", "DESC"]],
+            raw: true,
+        });
+        if (customers.length === 0)  throw ApiError("No customers found", 404)
+
+        const rows = customers.map(customer => ({
+            ...customer,
+            createdAt: new Date(customer.createdAt).toLocaleString(),
+        }));
+
+        const columns = [
+            { header: "Name", key: "name", width: 30 },
+            { header: "Phone", key: "phone", width: 20 },
+            { header: "Created At", key: "createdAt", width: 25 },
+        ];
+
+        const { workbook } = await exportExcel(columns, rows, "Customers");
+
+        res.setHeader(
+            "Content-Type",
+            format === 'xlsx' ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : 
+            format === 'csv' ? 'text/csv' : 'application/json'
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="customers.${format}"`
+        );
+
+        await workbook.xlsx.write(res);
+        return res.end();
+    }, 'exportCustomersInfo')
 }

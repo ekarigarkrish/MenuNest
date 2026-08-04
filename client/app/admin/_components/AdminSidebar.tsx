@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Fetch } from "@/config/axios.config";
 import Button from "@/components/ui/Button";
@@ -39,16 +39,17 @@ type NavItemType = {
 const navItems: NavItemType[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
-  { name: "Table Management", href: "/admin/table-management", icon: Grid3x3 },
-  { name: "Orders", icon: ClipboardList,
-    subItems:[
-      { name: "Order Management", href: "/admin/order-management" },
+  {
+    name: "Orders Management", icon: ClipboardList,
+    subItems: [
+      { name: "Live Orders", href: "/admin/order-management" },
       { name: "Order History", href: "/admin/order-history" }
     ]
-   },
+  },
+  { name: "Table Management", href: "/admin/table-management", icon: Grid3x3 },
   { name: "Customers", href: "/admin/customers", icon: Users },
-  { 
-    name: "Settings", 
+  {
+    name: "Settings",
     icon: Settings,
     href: '/admin/settings/general'
   },
@@ -57,6 +58,7 @@ const navItems: NavItemType[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -67,6 +69,14 @@ export default function AdminSidebar() {
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
+
+  // const updateQuery = (key: string, value: string) => {
+  //   const params = new URLSearchParams(searchParams.toString());
+
+  //   params.set(key, value);
+
+  //   router.replace(`${pathname}?${params.toString()}`);
+  // }
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -209,7 +219,7 @@ export default function AdminSidebar() {
                           transition={{ type: "spring", stiffness: 380, damping: 30 }}
                         />
                       )}
-                      
+
                       <div className="flex items-center gap-3">
                         <Icon className={`w-5 h-5 ${active ? "text-cayenne-red-500" : "text-carbon-black-500 group-hover:text-carbon-black-800"}`} />
                         <span>{item.name}</span>
@@ -320,7 +330,7 @@ export default function AdminSidebar() {
                 </div>
               )}
             </div>
-            
+
             {!isCollapsed && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -398,7 +408,7 @@ export default function AdminSidebar() {
                     {itemContent}
                   </button>
                 ) : (
-                  <Link href={item.href!} onClick={() => setIsMobileOpen(false)}>
+                  <Link href={item.href!} onClick={() => { setIsMobileOpen(false) }}>
                     {itemContent}
                   </Link>
                 )}
@@ -418,7 +428,7 @@ export default function AdminSidebar() {
                             <Link
                               key={subItem.name}
                               href={subItem.href}
-                              onClick={() => setIsMobileOpen(false)}
+                              onClick={() => { setIsMobileOpen(false) }}
                               className={`block px-3 py-2 text-sm rounded-lg transition-colors ${isSubActive ? "text-cayenne-red-600 bg-cayenne-red-50 font-medium" : "text-carbon-black-600 hover:text-carbon-black-900 hover:bg-carbon-black-50"}`}
                             >
                               {subItem.name}
@@ -467,7 +477,7 @@ export default function AdminSidebar() {
                 {!isCollapsed && <span className="font-semibold text-sm">{isLoggingOut ? 'Signing out…' : 'Sign Out'}</span>}
                 <LogOut className="w-5 h-5" />
               </Button>
-              
+
               {isCollapsed && (
                 <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 bg-carbon-black-900 text-white text-xs font-semibold rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-1 group-hover:translate-x-0 z-[60]">
                   {isLoggingOut ? 'Signing out…' : 'Sign Out'}

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Search,
     Download,
@@ -11,11 +11,16 @@ import {
     ChevronRight,
     UserPlus,
     ShoppingBag,
-    Loader2
+    Loader2,
+    FileSpreadsheet,
+    FileText,
+    FileJson,
+    ChevronDown
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import DatePicker, { DateRange } from "@/components/ui/DatePicker";
 import { Fetch } from "@/config/axios.config";
+import { toast } from "sonner";
 
 interface Order {
     id: string;
@@ -42,6 +47,19 @@ export default function CustomerManagementPage() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [filterDate, setDate] = useState<DateRange>({ from: null, to: null });
     const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0 })
+    
+    const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+    const exportMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+                setIsExportMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
@@ -81,6 +99,33 @@ export default function CustomerManagementPage() {
         });
     }
 
+    const exportData = async (format: string = 'csv') => {
+        setIsExportMenuOpen(false);
+        try {
+            const params = new URLSearchParams({
+                format: format,
+                startDate: filterDate?.from?.toISOString() ?? "",
+                endDate: filterDate?.to?.toISOString() ?? "",
+            })
+
+            const res = await Fetch.get(`/api/customer/export?${params?.toString() || ''}`, { responseType: 'blob', withCredentials: true, withXSRFToken: true });
+
+            const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `customers.${format}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.response?.data?.message || 'Failed to export Data.')
+        }
+    }
+
     return (
         <div className="w-full max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-8">
             {/* Header Section */}
@@ -89,12 +134,54 @@ export default function CustomerManagementPage() {
                     <h1 className="text-3xl font-bold font-heading text-gray-900 tracking-tight">Customers</h1>
                     <p className="text-gray-500 mt-2 text-sm">Manage your restaurant customers and view their order history.</p>
                 </div>
-                {/*                 
-                <div className="flex items-center gap-3">
-                    <Button variant="outline" leftIcon={<Download size={18} />}>
+                                
+                <div className="flex items-center gap-3 relative" ref={exportMenuRef}>
+                    <Button 
+                        variant="outline" 
+                        leftIcon={<Download size={18} />}
+                        rightIcon={<ChevronDown size={16} className={`transition-transform duration-200 ${isExportMenuOpen ? "rotate-180" : ""}`} />}
+                        onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                    >
                         Export
                     </Button>
-                </div> */}
+                    
+                    <AnimatePresence>
+                        {isExportMenuOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute right-0 top-full mt-2 w-52 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 py-2 z-50 overflow-hidden"
+                            >
+                                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                                    Export Options
+                                </div>
+                                <button
+                                    onClick={() => exportData('xlsx')}
+                                    className="group w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer flex items-center gap-3 text-gray-700 hover:bg-cayenne-red-50 hover:text-cayenne-red-600"
+                                >
+                                    <FileSpreadsheet size={16} className="text-gray-400 group-hover:text-cayenne-red-500 transition-colors" />
+                                    <span className="font-medium">Export as Excel</span>
+                                </button>
+                                {/* <button
+                                    onClick={() => exportData('pdf')}
+                                    className="group w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer flex items-center gap-3 text-gray-700 hover:bg-cayenne-red-50 hover:text-cayenne-red-600"
+                                >
+                                    <FileText size={16} className="text-gray-400 group-hover:text-cayenne-red-500 transition-colors" />
+                                    <span className="font-medium">Export as PDF</span>
+                                </button>
+                                <button
+                                    onClick={() => exportData('json')}
+                                    className="group w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer flex items-center gap-3 text-gray-700 hover:bg-cayenne-red-50 hover:text-cayenne-red-600"
+                                >
+                                    <FileJson size={16} className="text-gray-400 group-hover:text-cayenne-red-500 transition-colors" />
+                                    <span className="font-medium">Export as JSON</span>
+                                </button> */}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
             {/* Filters and Search */}

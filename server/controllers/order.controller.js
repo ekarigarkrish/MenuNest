@@ -18,7 +18,7 @@ export default {
         limit = parseInt(limit) || 10;
         const offset = (page - 1) * limit;
 
-        const where = { };
+        const where = { status: 'completed' };
 
         if (search) {
             where[Op.or] = [
@@ -109,17 +109,22 @@ export default {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
         const { count, rows } = await orderModel.findAndCountAll({
+            where: {
+                [Op.or]: [
+                    { status: { [Op.ne]: "completed" } },
+                    { status: "completed", updatedAt: { [Op.gte]: tenMinutesAgo } },
+                ],
+            },
             include: [{
                 model: tableModel,
                 as: 'table',
                 attributes: ['id', 'name']
             }],
             order: [['createdAt', 'DESC']],
-            limit,
-            offset,
-            raw: true, nest: true
+            limit, offset, raw: true, nest: true
         });
 
         // Format orders to match the client's expected structure
@@ -222,7 +227,7 @@ export default {
         }
 
         const { count, rows: orders } = await orderModel.findAndCountAll({
-            where: { customerId: customer.id,},
+            where: { customerId: customer.id, },
             order: [['createdAt', 'DESC']],
             limit,
             offset,

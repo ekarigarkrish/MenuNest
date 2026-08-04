@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from "react";
-import { X, Clock, CheckCircle2, UtensilsCrossed, ShoppingBag, Loader2, ChefHat, Bell, XCircle, Timer, Download } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { X, Clock, CheckCircle2, ShoppingBag, Loader2, ChefHat, Bell, XCircle, Timer, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -27,13 +27,12 @@ const getStatusConfig = (status: string) => {
     }
 };
 
-export default React.memo(function OrdersDrawer({ onClose, phone }: {
-    onClose: () => void;
-    phone?: string;
-}) {
+export default React.memo(function OrdersDrawer({ onClose, phone }: { onClose: () => void; phone?: string; }) {
     const { targetRef, isIntersecting } = useIntersectionObserver();
+    const [isAuthIssue, setIsAuthIssue] = useState<boolean>(false);
+    const [isOrderFetchLoading, setIsOrderFetchLoading] = useState<boolean>(false);
 
-    const { data: response, refetch, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    const { data: response, refetch, error, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         queryKey: ['orders', phone],
         queryFn: async ({ pageParam = 1 }) => {
             if (!phone) return null;
@@ -49,9 +48,25 @@ export default React.memo(function OrdersDrawer({ onClose, phone }: {
         enabled: !!phone
     });
 
-    React.useEffect(() => { refetch(); }, [])
+    const handleRetry = async () => {
+        setIsOrderFetchLoading(true);
+        if (isAuthIssue) {
+            await Fetch.post('/api/customer/check', { phone }, { withCredentials: true, withXSRFToken: true });
+            setIsAuthIssue(false);
+        }
+        refetch();
+        setIsOrderFetchLoading(false);
+    }
 
-    React.useEffect(() => {
+    useEffect(() => {
+        if ((error as any)?.request?.status === 401 || (error as any)?.response?.status === 401) {
+            setIsAuthIssue(true);
+        }
+    }, [error]);
+
+    useEffect(() => { refetch(); }, [])
+
+    useEffect(() => {
         if (isIntersecting && hasNextPage && !isFetchingNextPage) {
             fetchNextPage();
         }
@@ -163,6 +178,9 @@ export default React.memo(function OrdersDrawer({ onClose, phone }: {
                             <ShoppingBag className="w-12 h-12 text-gray-300" />
                             <p className="font-heading font-bold text-lg text-gray-600">No orders found</p>
                             <p className="text-sm text-center">You haven't placed any orders yet!</p>
+                            <Button onClick={handleRetry} disabled={isOrderFetchLoading} variant="secondary">
+                                {isOrderFetchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Try Again"}
+                            </Button>
                         </div>
                     ) : (
                         orders.map((order: any, index: number) => {

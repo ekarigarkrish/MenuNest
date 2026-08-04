@@ -10,6 +10,7 @@ export const sequelize = new Sequelize(
         dialect: 'mysql',
         logging: false,
         port: config.db_port,
+        timezone: "+05:30"
     }
 )
 
