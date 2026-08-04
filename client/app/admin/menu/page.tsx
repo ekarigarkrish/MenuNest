@@ -117,7 +117,7 @@ export default function AdminMenuManagementPage() {
     const isCategoryMutationPending = createCategoryMutation.isPending || updateCategoryMutation.isPending;
 
     return (
-        <Section className="flex h-full min-h-[calc(100vh-64px)] rounded-2xl overflow-hidden my-6 sm:my-0 w-full bg-white border border-gray-200 shadow-sm relative">
+        <Section className="flex h-full min-h-[calc(100vh-64px)] rounded-2xl overflow-hidden w-full bg-white border border-gray-200 shadow-sm relative">
             {/* Mobile Backdrop */}
             {isSidebarToggled && (
                 <div

@@ -29,18 +29,17 @@ export default function ColorThemePicker({
             onClick={() => onSelect(theme.id)}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className={`relative group flex flex-col items-start gap-2.5 p-3.5 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer focus:outline-none ${
-              isSelected
+            className={`relative group flex flex-col items-start gap-2.5 p-3.5 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer focus:outline-none ${isSelected
                 ? "border-current shadow-md ring-2 ring-offset-1"
                 : "border-gray-200 hover:border-gray-300 hover:shadow-sm bg-white"
-            }`}
+              }`}
             style={
               isSelected
                 ? ({
-                    borderColor: theme.swatch,
-                    "--tw-ring-color": theme.swatch,
-                    backgroundColor: `${theme.swatch}08`,
-                  } as any)
+                  borderColor: theme.swatch,
+                  "--tw-ring-color": theme.swatch,
+                  backgroundColor: `${theme.swatch}08`,
+                } as any)
                 : {}
             }
             aria-label={`Select ${theme.name} theme`}
@@ -48,7 +47,7 @@ export default function ColorThemePicker({
           >
             {/* Color swatch */}
             <div
-              className="w-full h-10 rounded-lg shadow-sm flex-shrink-0 relative overflow-hidden"
+              className="w-full h-10 rounded-lg shadow-sm shrink-0 relative overflow-hidden"
               style={{ background: theme.gradient }}
             >
               {/* Shine overlay */}
@@ -75,9 +74,8 @@ export default function ColorThemePicker({
             {/* Labels */}
             <div className="min-w-0 w-full">
               <p
-                className={`text-sm font-semibold truncate transition-colors ${
-                  isSelected ? "text-gray-900" : "text-gray-700"
-                }`}
+                className={`text-sm font-semibold truncate transition-colors ${isSelected ? "text-gray-900" : "text-gray-700"
+                  }`}
               >
                 {theme.name}
               </p>

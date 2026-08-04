@@ -124,12 +124,12 @@ export default function OrderHistoryPage() {
 
             const blob = new Blob([res.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
-            
+
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             iframe.src = url;
             document.body.appendChild(iframe);
-            
+
             iframe.onload = () => {
                 setTimeout(() => {
                     iframe.contentWindow?.focus();
@@ -239,7 +239,7 @@ export default function OrderHistoryPage() {
                                     >
                                         {/* <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center border border-gray-200 text-gray-700 shadow-sm">
+                                                <div className="shrink-0 h-10 w-10 rounded-full bg-linear-to-br from-gray-100 to-gray-50 flex items-center justify-center border border-gray-200 text-gray-700 shadow-sm">
                                                     <ShoppingBag size={18} />
                                                 </div>
                                                 <div className="ml-4">

@@ -47,7 +47,7 @@ export default function CustomerManagementPage() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [filterDate, setDate] = useState<DateRange>({ from: null, to: null });
     const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0 })
-    
+
     const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
     const exportMenuRef = useRef<HTMLDivElement>(null);
 
@@ -134,17 +134,17 @@ export default function CustomerManagementPage() {
                     <h1 className="text-3xl font-bold font-heading text-gray-900 tracking-tight">Customers</h1>
                     <p className="text-gray-500 mt-2 text-sm">Manage your restaurant customers and view their order history.</p>
                 </div>
-                                
+
                 <div className="flex items-center gap-3 relative" ref={exportMenuRef}>
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="outline"
                         leftIcon={<Download size={18} />}
                         rightIcon={<ChevronDown size={16} className={`transition-transform duration-200 ${isExportMenuOpen ? "rotate-180" : ""}`} />}
                         onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                     >
                         Export
                     </Button>
-                    
+
                     <AnimatePresence>
                         {isExportMenuOpen && (
                             <motion.div
@@ -187,7 +187,7 @@ export default function CustomerManagementPage() {
             {/* Filters and Search */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-end items-center gap-4">
 
-                <div className="flex flex-col md:flex-row items-center gap-4 w-full sm:w-auto">
+                <div className="flex flex-col lg:flex-row items-center gap-4 w-full sm:w-auto">
 
                     <div className="relative w-full sm:w-72">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -251,12 +251,11 @@ export default function CustomerManagementPage() {
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-cayenne-red-100 to-cayenne-red-50 flex items-center justify-center border border-cayenne-red-100 text-cayenne-red-700 font-bold text-sm shadow-sm">
+                                                <div className="shrink-0 h-10 w-10 rounded-full bg-linear-to-br from-cayenne-red-100 to-cayenne-red-50 flex items-center justify-center border border-cayenne-red-100 text-cayenne-red-700 font-bold text-sm shadow-sm">
                                                     {getInitials(customer.name)}
                                                 </div>
                                                 <div className="ml-4">
                                                     <div className="text-sm font-medium text-gray-900">{customer.name}</div>
-                                                    <div className="text-xs text-gray-500">ID: {customer.id}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -291,20 +290,20 @@ export default function CustomerManagementPage() {
                         Showing <span className="font-medium text-gray-900">{filteredCustomers.length > 0 ? (pagination.page - 1) * pagination.limit + 1 : 0}</span> to <span className="font-medium text-gray-900">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-medium text-gray-900">{pagination.total}</span> results
                     </div>
                     <div className="flex items-center gap-1">
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="!h-8 !w-8 rounded-md" 
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="!h-8 !w-8 rounded-md"
                             disabled={pagination.page === 1}
                             onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
                         >
                             <ChevronLeft size={20} />
                         </Button>
-                        
+
                         {(() => {
                             const totalPages = Math.ceil(pagination.total / pagination.limit) || 1;
                             const pages = [];
-                            
+
                             if (totalPages <= 5) {
                                 for (let i = 1; i <= totalPages; i++) pages.push(i);
                             } else {
@@ -316,7 +315,7 @@ export default function CustomerManagementPage() {
                                     pages.push(1, '...', pagination.page - 1, pagination.page, pagination.page + 1, '...', totalPages);
                                 }
                             }
-                            
+
                             return pages.map((page, index) => (
                                 typeof page === 'number' ? (
                                     <Button
@@ -333,10 +332,10 @@ export default function CustomerManagementPage() {
                             ));
                         })()}
 
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="!h-8 !w-8 rounded-md" 
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="!h-8 !w-8 rounded-md"
                             disabled={pagination.page >= Math.ceil(pagination.total / pagination.limit) || pagination.total === 0}
                             onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
                         >

@@ -253,7 +253,7 @@ export default function AdminDashboardPage() {
                             />
                         </div>
 
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col h-full">
+                        <div className="hidden md:block bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col h-full">
                             <div className="flex items-center justify-between mb-5">
                                 <h3 className="text-lg font-bold text-gray-900 font-heading">
                                     Quick Links

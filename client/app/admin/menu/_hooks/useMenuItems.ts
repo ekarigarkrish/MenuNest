@@ -5,13 +5,7 @@ import { toast } from "sonner";
 export function useMenuItems(activeCategoryId: string, deferredFoodSearch: string) {
     const queryClient = useQueryClient();
 
-    const { 
-        data: menuItemsPages, 
-        isLoading: isMenuItemsLoading,
-        isFetchingNextPage,
-        fetchNextPage,
-        hasNextPage
-    } = useInfiniteQuery({
+    const { data: menuItemsPages, isLoading: isMenuItemsLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
         queryKey: ["menu-items", activeCategoryId, deferredFoodSearch],
         queryFn: async ({ pageParam = 1 }) => {
             if (!activeCategoryId) return { menuItems: [], hasMore: false, page: 1 };
@@ -29,7 +23,7 @@ export function useMenuItems(activeCategoryId: string, deferredFoodSearch: strin
         initialPageParam: 1,
         enabled: !!activeCategoryId,
     });
-    
+
 
     const activeCategoryFoods = menuItemsPages?.pages.flatMap((p: any) => p.menuItems) ?? [];
 

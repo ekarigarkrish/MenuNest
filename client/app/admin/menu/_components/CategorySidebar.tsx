@@ -88,12 +88,12 @@ export default React.memo(function CategorySidebar({
   return (
     <div
       className={`
-                absolute xl:relative z-50 xl:z-10 h-full w-[85vw] sm:w-80 flex-shrink-0
+                absolute xl:relative z-50 xl:z-10 h-full w-[85vw] sm:w-80 shrink-0
                 bg-gray-50 rounded-2xl flex flex-col
                 transition-all duration-300 ease-in-out left-0 top-0 bottom-0
-                ${isToggled 
-                    ? "translate-x-0 shadow-2xl xl:-translate-x-full xl:-ml-80 xl:shadow-none" 
-                    : "-translate-x-full xl:translate-x-0 xl:ml-0 xl:shadow-none"}
+                ${isToggled
+          ? "translate-x-0 shadow-2xl xl:-translate-x-full xl:-ml-80 xl:shadow-none"
+          : "-translate-x-full xl:translate-x-0 xl:ml-0 xl:shadow-none"}
             `}
     >
       {/* ── Header ────────────────────────────────────────────────────── */}
@@ -181,7 +181,7 @@ export default React.memo(function CategorySidebar({
                     }`}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
-                    <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200/50">
+                    <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200/50">
                       {cat.image ? (
                         <Image
                           src={cat.image}
@@ -203,7 +203,7 @@ export default React.memo(function CategorySidebar({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     {!cat.isVisible && (
                       <EyeOff className={`w-4 h-4 ${isActive ? "text-cayenne-red-400" : "text-gray-400"}`} />
                     )}

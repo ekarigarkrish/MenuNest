@@ -6,21 +6,15 @@ import { CategoryData } from "../page";
 export function useCategories(deferredSearch: string) {
     const queryClient = useQueryClient();
 
-    const { 
-        data: categoryPages, 
-        isLoading: isCategoriesLoading, 
-        isFetchingNextPage, 
-        fetchNextPage, 
-        hasNextPage 
-    } = useInfiniteQuery({
+    const { data: categoryPages, isLoading: isCategoriesLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
         queryKey: ["categories", deferredSearch],
         queryFn: async ({ pageParam = 1 }) => {
             const params = new URLSearchParams({ page: String(pageParam), limit: String(10) });
             if (deferredSearch) params.set("search", deferredSearch);
 
-            const res = await Fetch.get(`/api/category/all?${params.toString()}`, { 
-                withCredentials: true, 
-                withXSRFToken: true 
+            const res = await Fetch.get(`/api/category/all?${params.toString()}`, {
+                withCredentials: true,
+                withXSRFToken: true
             });
             return res.data;
         },

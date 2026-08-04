@@ -32,7 +32,7 @@ export default React.memo(function FoodCard({ item, onAdd, cartQty, onIncrease, 
             className="bg-white rounded-2xl border border-carbon-black-100 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full"
         >
             {/* Image or Emoji */}
-            <div className="relative bg-gradient-to-br from-orange-50 to-cayenne-red-50 h-32 sm:h-36 md:h-40 flex items-center justify-center text-5xl sm:text-6xl flex-shrink-0">
+            <div className="relative bg-linear-to-br from-orange-50 to-cayenne-red-50 h-32 sm:h-36 md:h-40 flex items-center justify-center text-5xl sm:text-6xl shrink-0">
                 {item.image ? (
                     <Image
                         src={item.image}
