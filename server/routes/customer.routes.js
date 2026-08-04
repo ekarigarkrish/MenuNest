@@ -12,4 +12,6 @@ router.get('/me', isCustomerAuthenticated, customerController.getCustomerInfo)
 
 router.put('/update', isCustomerAuthenticated, customerController.updateCustomerInfo)
 
+router.get('/export', isAuthenticated('admin'), customerController.exportCustomersInfo)
+
 export default router

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Utensils, ChefHat, Sparkles, Flame } from 'lucide-react';
+import { useRestaurantBranding } from '@/hooks/useRestaurantBranding';
 
 const LOADING_MESSAGES = [
   'Warming up the kitchen...',
@@ -13,6 +14,7 @@ const LOADING_MESSAGES = [
 ];
 
 export default function Loading() {
+  const { branding } = useRestaurantBranding()
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function Loading() {
 
       {/* Main Glassmorphic Loading Card */}
       <div className="relative z-10 max-w-sm w-full mx-4 p-8 sm:p-10 rounded-3xl backdrop-blur-2xl bg-white/[0.03] border border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.6)] text-center flex flex-col items-center">
-        
+
         {/* Brand Tag Header */}
         <motion.div
           initial={{ opacity: 0, y: -15 }}
@@ -42,7 +44,7 @@ export default function Loading() {
           className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cayenne-red-500/10 border border-cayenne-red-500/30 text-cayenne-red-400 text-xs font-semibold uppercase tracking-wider mb-8 shadow-inner"
         >
           <Flame className="w-3.5 h-3.5 text-cayenne-red-400 animate-pulse" />
-          <span>MenuNest</span>
+          <span> {branding?.name} </span>
           <Sparkles className="w-3 h-3 text-orange-400" />
         </motion.div>
 
