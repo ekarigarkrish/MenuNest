@@ -71,16 +71,19 @@ export default React.memo(function CartDrawer({
         onClose();
     };
 
-    // For Online Payment Mode Error
-    const handleError = (data: any) => {
-        setIsPlacing(false);
-        toast.error(data.message || "Something went wrong.");
-        if (!data.isphoneExist) {
-            onClose();
-            setIsPlacing(false)
-            onCustomerFormOpen?.() // close cart & open customer modal
+    const placeOrder = () => {
+        if (!tableToken) {
+            toast.error('Table Token not found. Please scan the table QR code.')
+            return
         }
-    };
+        if (!storage.getDetails()?.phone) {
+            onClose()
+            onCustomerFormOpen?.()
+            return
+        }
+        setIsPlacing(true);
+        socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })
+    }
 
     useEffect(() => {
         if (!socket) return;
@@ -90,6 +93,12 @@ export default React.memo(function CartDrawer({
             setIsPlacing(false);
             setIsOrderPlaced(true);
             if (onClearCart) onClearCart();
+        };
+
+        // For Order Error (tableToken missing, phone missing, table not found, etc.)
+        const handleError = (data: any) => {
+            setIsPlacing(false);
+            toast.error(data.message || "Something went wrong.");
         };
 
         socket.on("order_error", handleError);
@@ -180,7 +189,7 @@ export default React.memo(function CartDrawer({
                                 <CheckCircle className="w-12 h-12" />
                             </motion.div>
                             <h3 className="font-heading font-bold text-2xl text-carbon-black-900">Order Placed!</h3>
-                            <p className="text-sm text-carbon-black-500 max-w-[250px]">
+                            <p className="text-sm text-carbon-black-500 max-w-62.5">
                                 Your delicious meal is being prepared. It will be served to you shortly!
                             </p>
                         </motion.div>
@@ -196,7 +205,7 @@ export default React.memo(function CartDrawer({
                                 key={item.id}
                                 className="flex items-center gap-3 p-3 rounded-xl border border-carbon-black-100 bg-carbon-black-50"
                             >
-                                <div className="w-10 h-10 relative flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-carbon-black-100/50">
+                                <div className="w-10 h-10 relative shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-carbon-black-100/50">
                                     <Image src={item.image} alt={item.name} fill className="object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -205,7 +214,7 @@ export default React.memo(function CartDrawer({
                                         ₹{item.discountPrice} × {item.qty} = <span className="font-semibold text-carbon-black-700">₹{item.discountPrice * item.qty}</span>
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-1 flex-shrink-0">
+                                <div className="flex items-center gap-1 shrink-0">
                                     <Button variant="ghost" size="icon" onClick={() => onDecrease(item.id)} className="w-6 h-6 p-0 rounded-md bg-carbon-black-100 hover:bg-carbon-black-200 text-carbon-black-600 transition-colors">
                                         <Minus className="w-3 h-3" />
                                     </Button>
@@ -268,11 +277,7 @@ export default React.memo(function CartDrawer({
                                 size="lg"
                                 className="w-full border-carbon-black-200 text-carbon-black-700 hover:bg-carbon-black-50 hover:text-carbon-black-900 focus-visible:ring-carbon-black-500"
                                 disabled={isPlacing}
-                                onClick={() => {
-                                    if (!tableToken) return
-                                    setIsPlacing(true);
-                                    socket?.emit('place_order', { cart, total, tableToken, ...storage.getDetails() })
-                                }}
+                                onClick={placeOrder}
                                 rightIcon={isPlacing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
                             >
                                 {isPlacing ? "Placing Order..." : "Place Order & Pay Later"}

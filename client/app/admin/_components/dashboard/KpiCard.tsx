@@ -34,8 +34,8 @@ export default function KpiCard({
         trend === "up"
             ? "text-emerald-600 bg-emerald-50"
             : trend === "down"
-            ? "text-red-500 bg-red-50"
-            : "text-gray-500 bg-gray-100";
+                ? "text-red-500 bg-red-50"
+                : "text-gray-500 bg-gray-100";
 
     return (
         <motion.div
@@ -47,7 +47,7 @@ export default function KpiCard({
             {/* Top row: icon + trend badge */}
             <div className="flex items-start justify-between">
                 <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
                 >
                     {icon}
                 </div>

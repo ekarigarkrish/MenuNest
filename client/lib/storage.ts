@@ -30,3 +30,5 @@ export const storage = {
         else sessionStorage.clear();
     }
 }
+
+export default storage

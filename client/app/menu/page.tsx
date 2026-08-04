@@ -15,6 +15,7 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Fetch } from "@/config/axios.config";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import { storage as browserStorage } from "@/lib/storage";
 
 type FoodItem = {
     id: string;
@@ -31,27 +32,25 @@ type FoodItem = {
 
 const storage = {
     setDetails: (details: any) => {
-        sessionStorage.setItem('details', JSON.stringify(details));
+        browserStorage.sessionStorage.set('details', details);
     },
     getDetails: () => {
-        const details = sessionStorage.getItem('details');
-        return details ? JSON.parse(details) : null;
+        return browserStorage.sessionStorage.get('details');
     },
     removeDetails: () => {
-        sessionStorage.removeItem('details');
+        browserStorage.sessionStorage.remove('details');
     }
 }
 
 const cartStorage = {
     setCartDetails: (details: any) => {
-        sessionStorage.setItem('cartDetails', JSON.stringify(details));
+        browserStorage.sessionStorage.set('cartDetails', details);
     },
     getCartDetails: () => {
-        const details = sessionStorage.getItem('cartDetails');
-        return details ? JSON.parse(details) : null;
+        return browserStorage.sessionStorage.get('cartDetails');
     },
     removeCartDetails: () => {
-        sessionStorage.removeItem('cartDetails');
+        browserStorage.sessionStorage.remove('cartDetails');
     }
 }
 
@@ -389,7 +388,7 @@ export default React.memo(function Menu() {
                         </div>
 
                         {/* Diet Filter */}
-                        <div className="flex items-center p-1 bg-carbon-black-50 rounded-xl border border-carbon-black-100 flex-shrink-0 h-11">
+                        <div className="flex items-center p-1 bg-carbon-black-50 rounded-xl border border-carbon-black-100 shrink-0 h-11">
                             {(["all", "veg", "non-veg"] as const).map((f) => {
                                 const isActive = dietFilter === f;
                                 return (
@@ -437,7 +436,7 @@ export default React.memo(function Menu() {
                                     id={`cat-${cat.id}`}
                                     variant={isActive ? "primary" : "ghost"}
                                     onClick={() => setActiveCategory(cat.id)}
-                                    className={`flex-shrink-0 flex items-center gap-2 !px-4 !py-2.5 !rounded-xl text-sm font-semibold transition-all duration-150 ${isActive
+                                    className={`shrink-0 flex items-center gap-2 !px-4 !py-2.5 !rounded-xl text-sm font-semibold transition-all duration-150 ${isActive
                                         ? "shadow-sm"
                                         : "bg-white text-carbon-black-600 border border-carbon-black-200 hover:border-cayenne-red-300 hover:text-cayenne-red-600 hover:bg-transparent"
                                         }`}

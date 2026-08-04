@@ -117,80 +117,80 @@ export default React.memo(function FoodGrid({
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 sm:gap-6">
-              {activeCategoryFoods.map((food) => (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}                                                   
-                  key={food.id}
-                  className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:border-gray-300 transition-all duration-300 flex flex-col"
-                >
-                  <div className="h-48 bg-gray-100 relative overflow-hidden flex-shrink-0">
-                    {food.image ? (
-                      <Image
-                        src={food.image}
-                        alt={food.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-12 h-12 text-gray-300" />
-                      </div>
-                    )}
+            {activeCategoryFoods.map((food) => (
+              <motion.div
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                key={food.id}
+                className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:border-gray-300 transition-all duration-300 flex flex-col"
+              >
+                <div className="h-48 bg-gray-100 relative overflow-hidden shrink-0">
+                  {food.image ? (
+                    <Image
+                      src={food.image}
+                      alt={food.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <ImageIcon className="w-12 h-12 text-gray-300" />
+                    </div>
+                  )}
 
-                    <div className="absolute top-3 left-3 flex flex-col gap-2">
-                      <span className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg shadow-sm border ${food.isVeg
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : 'bg-rose-50 text-rose-700 border-rose-200'
-                        }`}>
-                        {food.isVeg ? 'Veg' : 'Non-Veg'}
+                  <div className="absolute top-3 left-3 flex flex-col gap-2">
+                    <span className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg shadow-sm border ${food.isVeg
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                      }`}>
+                      {food.isVeg ? 'Veg' : 'Non-Veg'}
+                    </span>
+                  </div>
+
+                  {!food.isAvailable && (
+                    <div className="absolute top-3 right-3">
+                      <span className="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg bg-gray-900 text-white shadow-sm flex items-center gap-1.5">
+                        <EyeOff className="w-3 h-3" /> Hidden
                       </span>
                     </div>
+                  )}
 
-                    {!food.isAvailable && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-lg bg-gray-900 text-white shadow-sm flex items-center gap-1.5">
-                          <EyeOff className="w-3 h-3" /> Hidden
-                        </span>
-                      </div>
-                    )}
+                  {/* Hover Actions */}
+                  <div className="absolute inset-0 bg-gray-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                    <Button onClick={() => onEditFood(food)} variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-cayenne-red-600 hover:bg-gray-50 shadow-lg">
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button onClick={() => onDeleteFood(food)} variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-red-600 hover:bg-gray-50 shadow-lg">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
 
-                    {/* Hover Actions */}
-                    <div className="absolute inset-0 bg-gray-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                      <Button onClick={() => onEditFood(food)} variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-cayenne-red-600 hover:bg-gray-50 shadow-lg">
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button onClick={() => onDeleteFood(food)} variant="ghost" size="icon" className="rounded-full bg-white text-gray-700 hover:text-red-600 hover:bg-gray-50 shadow-lg">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex justify-between items-start mb-2 gap-4">
+                    <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-cayenne-red-400 transition-colors line-clamp-1">
+                      {food.name}
+                    </h3>
+                    <div className="flex flex-col items-end">
+                      {food.discountPrice != null && food.discountPrice > 0 ? (
+                        <>
+                          <span className="font-extrabold text-lg text-gray-900">₹{food.discountPrice.toFixed(2)}</span>
+                          <span className="text-sm font-medium text-gray-400 line-through">₹{food.price?.toFixed(2)}</span>
+                        </>
+                      ) : (
+                        <span className="font-extrabold text-lg text-gray-900">₹{food.price.toFixed(2)}</span>
+                      )}
                     </div>
                   </div>
-
-                  <div className="p-5 flex flex-col flex-1">
-                    <div className="flex justify-between items-start mb-2 gap-4">
-                      <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-cayenne-red-400 transition-colors line-clamp-1">
-                        {food.name}
-                      </h3>
-                      <div className="flex flex-col items-end">
-                        {food.discountPrice != null && food.discountPrice > 0 ? (
-                          <>
-                            <span className="font-extrabold text-lg text-gray-900">₹{food.discountPrice.toFixed(2)}</span>
-                            <span className="text-sm font-medium text-gray-400 line-through">₹{food.price?.toFixed(2)}</span>
-                          </>
-                        ) : (
-                          <span className="font-extrabold text-lg text-gray-900">₹{food.price.toFixed(2)}</span>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed flex-1">
-                      {food.description}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
+                  <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed flex-1">
+                    {food.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
 

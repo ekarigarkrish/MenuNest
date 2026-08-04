@@ -3,8 +3,10 @@ import config from './config'
 
 export const Fetch = axios.create({
     baseURL: config.serverOrigin,
-    xsrfCookieName: 'csrf-token', // Let Axios automatically read this non-HttpOnly cookie
-    xsrfHeaderName: 'x-csrf-token' // Let Axios automatically append this header
+    withCredentials: true,
+    withXSRFToken: true,
+    xsrfCookieName: 'csrf-token',
+    xsrfHeaderName: 'x-csrf-token'
 })
 
 export const Api = axios.create({

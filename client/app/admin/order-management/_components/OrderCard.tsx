@@ -155,8 +155,8 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
             </div>
             <span className="text-xs text-gray-500 font-medium">#{order.id.split('-')[0]}</span>
           </div>
-          <div className="flex items-center text-gray-500 text-sm font-medium bg-gray-50 px-2 py-1 rounded-md flex-shrink-0">
-            <Clock className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+          <div className="flex items-center text-gray-500 text-sm font-medium bg-gray-50 px-2 py-1 rounded-md shrink-0">
+            <Clock className="w-3.5 h-3.5 mr-1 shrink-0" />
             {timeAgo(order.createdAt)}
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
                 <span className="font-semibold text-gray-700 whitespace-nowrap">{item.quantity}x</span>
                 <span className="text-gray-600 line-clamp-2">{item.name}</span>
               </div>
-              <span className="text-gray-500 whitespace-nowrap flex-shrink-0">₹{item.price * item.quantity}</span>
+              <span className="text-gray-500 whitespace-nowrap shrink-0">₹{item.price * item.quantity}</span>
             </div>
           ))}
         </div>

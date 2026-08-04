@@ -359,7 +359,7 @@ export default function GeneralPage() {
           <div className="flex items-start justify-between gap-4 border-b border-carbon-black-100 pb-4">
             <div className="flex items-center gap-3">
               <div
-                className="flex items-center justify-center w-9 h-9 rounded-lg flex-shrink-0"
+                className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
                 style={{ backgroundColor: `${currentTheme.swatch}18` }}
               >
                 <Palette className="w-5 h-5" style={{ color: currentTheme.swatch }} />
@@ -373,7 +373,7 @@ export default function GeneralPage() {
             </div>
             {/* Active theme badge */}
             <div
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 mt-1"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 mt-1"
               style={{
                 backgroundColor: `${currentTheme.swatch}15`,
                 color: currentTheme.swatch,

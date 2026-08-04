@@ -23,6 +23,7 @@ import {
   Grid3x3,
   ChevronDown
 } from "lucide-react";
+import storage from "@/lib/storage";
 
 type SubItem = {
   name: string;
@@ -58,6 +59,7 @@ const navItems: NavItemType[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const user = storage.localStorage.get("user") || {};
   const searchParams = useSearchParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -115,7 +117,7 @@ export default function AdminSidebar() {
       {/* Mobile Top Header */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-carbon-black-100 flex items-center justify-between px-4 z-40">
         <Link href="/admin" className="flex items-center gap-2.5 group">
-          <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-sm">
             {branding?.logo ? (
               <Image src={branding.logo} alt={`${displayName} logo`} fill sizes="32px" className="object-cover" />
             ) : (
@@ -168,7 +170,7 @@ export default function AdminSidebar() {
               {/* Header */}
               <div className="p-5 border-b border-carbon-black-100 flex items-center justify-between">
                 <Link href="/admin" className="flex items-center gap-2.5 group" onClick={() => setIsMobileOpen(false)}>
-                  <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 shadow-sm">
                     {branding?.logo ? (
                       <Image src={branding.logo} alt={`${displayName} logo`} fill sizes="32px" className="object-cover" />
                     ) : (
@@ -276,13 +278,15 @@ export default function AdminSidebar() {
 
               {/* Profile / Logout Footer */}
               <div className="p-4 border-t border-carbon-black-100 bg-carbon-black-50/50">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cayenne-red-500/10 to-orange-500/10 text-cayenne-red-600 border border-cayenne-red-100 flex items-center justify-center font-bold font-heading">
-                    AD
+                <div className="flex items-center gap-3 mb-3 overflow-hidden">
+                  <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-tr from-cayenne-red-500/10 to-orange-500/10 text-cayenne-red-600 border border-cayenne-red-100 flex items-center justify-center font-bold font-heading">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'AD'}
                   </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-carbon-black-850 leading-tight">Admin User</h4>
-                    <p className="text-xs text-carbon-black-500">Restaurant Manager</p>
+                  <div className="flex flex-col min-w-0">
+                    <h4 className="text-sm font-semibold text-carbon-black-850 leading-tight truncate">
+                      {user?.name || 'Admin'}
+                    </h4>
+                    <p className="text-xs text-carbon-black-500 truncate">Restaurant Manager</p>
                   </div>
                 </div>
                 <button
@@ -341,7 +345,7 @@ export default function AdminSidebar() {
                 <span className="font-heading font-bold text-lg tracking-tight text-carbon-black-900 whitespace-nowrap truncate">
                   {displayName}
                 </span>
-                <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded whitespace-nowrap flex-shrink-0">
+                <span className="text-[10px] font-semibold bg-cayenne-red-50 text-cayenne-red-600 px-1.5 py-0.5 rounded whitespace-nowrap shrink-0">
                   Admin
                 </span>
               </motion.div>
@@ -448,10 +452,10 @@ export default function AdminSidebar() {
         <div className="p-4 border-t border-carbon-black-100 bg-carbon-black-50/30">
           <div className={`flex items-center ${isCollapsed ? 'justify-center flex-col gap-3' : 'justify-between'}`}>
             <div className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'w-full justify-center' : ''}`}>
-              {/* <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-tr from-cayenne-red-500/10 to-orange-500/10 text-cayenne-red-600 border border-cayenne-red-100 flex items-center justify-center font-bold font-heading">
-                AD
-              </div> */}
-              {/* {!isCollapsed && (
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-tr from-cayenne-red-500/10 to-orange-500/10 text-cayenne-red-600 border border-cayenne-red-100 flex items-center justify-center font-bold font-heading">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'AD'}
+              </div>
+             {!isCollapsed && (
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -459,22 +463,22 @@ export default function AdminSidebar() {
                   className="flex flex-col min-w-0"
                 >
                   <h4 className="text-sm font-semibold text-carbon-black-850 leading-tight truncate">
-                    Admin
+                    {user?.name || 'Admin'}
                   </h4>
                   <p className="text-xs text-carbon-black-500 truncate">Restaurant Manager</p>
                 </motion.div>
-              )} */}
+              )}
             </div>
 
-            <div className="group relative flex items-center justify-center w-full">
+            <div className={`group relative flex items-center justify-center ${isCollapsed ? 'w-full' : 'shrink-0'}`}>
               <Button
                 variant="ghost"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="w-full flex items-center justify-center gap-2 text-carbon-black-600 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-xl disabled:opacity-50 disabled:cursor-not-allowed py-2"
+                className={`flex items-center justify-center gap-2 text-carbon-black-600 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-xl disabled:opacity-50 disabled:cursor-not-allowed ${isCollapsed ? 'w-full py-2' : 'p-2.5'}`}
                 aria-label="Sign out"
               >
-                {!isCollapsed && <span className="font-semibold text-sm">{isLoggingOut ? 'Signing out…' : 'Sign Out'}</span>}
+                {!isCollapsed && isLoggingOut && <span className="font-semibold text-sm">Signing out…</span>}
                 <LogOut className="w-5 h-5" />
               </Button>
 
