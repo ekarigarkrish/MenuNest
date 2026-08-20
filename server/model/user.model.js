@@ -15,25 +15,28 @@ const userModel = sequelize.define('users', {
     email: {
         type: DataTypes.STRING,
         unique: true,
-        allowNull: false
     },
     // status: {
     //     type: DataTypes.ENUM('active', 'inactive'),
     //     allowNull: false,
     //     defaultValue: 'active'
-    // },
+    // }, 
+    phone: {
+        type: DataTypes.STRING,
+        unique: true,
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: false
     },
     role: {
-        type: DataTypes.ENUM('admin','staff'),
+        type: DataTypes.ENUM('admin', 'staff'),
         allowNull: false,
         defaultValue: 'staff'
     }
 }, {
     timestamps: true,
-    tableName:'users',
+    tableName: 'users',
     hooks: {
         beforeSave: async (user) => {
             if (user.changed('password')) {

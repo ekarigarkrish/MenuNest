@@ -4,6 +4,7 @@ import orderModel from "./order.model.js";
 import tableModel from "./table.model.js";
 import customerModel from "./customer.model.js";
 import restaurantModel from "./restaurant.model.js"; // standalone singleton — no associations needed
+import userModel from "./user.model.js";
 
 categoryModel.hasMany(menuItemModel, {
     foreignKey: "categoryId",
@@ -35,10 +36,22 @@ orderModel.belongsTo(customerModel, {
     as: "customer",
 });
 
+// User <-> Table  (one user/staff can own many tables)
+userModel.hasMany(tableModel, {
+    foreignKey: "userId",
+    as: "tables",
+});
+
+tableModel.belongsTo(userModel, {
+    foreignKey: "userId",
+    as: "user",
+});
+
 export {
     categoryModel,
     menuItemModel,
     orderModel,
     tableModel,
-    customerModel
+    customerModel,
+    userModel
 }

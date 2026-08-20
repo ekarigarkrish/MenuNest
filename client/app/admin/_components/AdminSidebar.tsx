@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -59,12 +59,16 @@ const navItems: NavItemType[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const user = storage.localStorage.get("user") || {};
-  const searchParams = useSearchParams();
+  const [user, setUser] = useState<Record<string, any> | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
+
+  // Defer localStorage access to the client to prevent SSR/hydration mismatch
+  useEffect(() => {
+    setUser(storage.localStorage.get("user") || {});
+  }, []);
   const { branding } = useRestaurantBranding();
   const displayName = branding?.name || "";
 

@@ -11,6 +11,8 @@ export default {
             httpOnly: false,
             secure: !config.isDEV,
             sameSite: config.isDEV ? 'lax' : 'none',
+            domain: config.isDEV ? undefined : `.${config.clientOrigin.split('//')[1]}`,
+            path: "/"
         });
 
         return res.status(200).json({ success: true, message: "CSRF cookies set successfully" });

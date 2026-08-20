@@ -18,6 +18,7 @@ import {
     ChevronDown
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import Pagination from "@/components/ui/Pagination";
 import DatePicker, { DateRange } from "@/components/ui/DatePicker";
 import { Fetch } from "@/config/axios.config";
 import { toast } from "sonner";
@@ -46,7 +47,7 @@ export default function CustomerManagementPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [filterDate, setDate] = useState<DateRange>({ from: null, to: null });
-    const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0 })
+    const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 1, total: 0 })
 
     const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
     const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -285,64 +286,13 @@ export default function CustomerManagementPage() {
                 </div>
 
                 {/* Pagination */}
-                <div className="bg-white px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                    <div className="text-sm text-gray-500">
-                        Showing <span className="font-medium text-gray-900">{filteredCustomers.length > 0 ? (pagination.page - 1) * pagination.limit + 1 : 0}</span> to <span className="font-medium text-gray-900">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-medium text-gray-900">{pagination.total}</span> results
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="!h-8 !w-8 rounded-md"
-                            disabled={pagination.page === 1}
-                            onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                        >
-                            <ChevronLeft size={20} />
-                        </Button>
-
-                        {(() => {
-                            const totalPages = Math.ceil(pagination.total / pagination.limit) || 1;
-                            const pages = [];
-
-                            if (totalPages <= 5) {
-                                for (let i = 1; i <= totalPages; i++) pages.push(i);
-                            } else {
-                                if (pagination.page <= 3) {
-                                    pages.push(1, 2, 3, 4, '...', totalPages);
-                                } else if (pagination.page >= totalPages - 2) {
-                                    pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-                                } else {
-                                    pages.push(1, '...', pagination.page - 1, pagination.page, pagination.page + 1, '...', totalPages);
-                                }
-                            }
-
-                            return pages.map((page, index) => (
-                                typeof page === 'number' ? (
-                                    <Button
-                                        key={index}
-                                        variant={pagination.page === page ? "outline" : "ghost"}
-                                        className={`!h-8 !w-8 rounded-md p-0 ${pagination.page === page ? 'bg-gray-50 text-cayenne-red-600 border-cayenne-red-200' : 'text-gray-600'}`}
-                                        onClick={() => setPagination(prev => ({ ...prev, page }))}
-                                    >
-                                        {page}
-                                    </Button>
-                                ) : (
-                                    <span key={index} className="px-1 text-gray-400">...</span>
-                                )
-                            ));
-                        })()}
-
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="!h-8 !w-8 rounded-md"
-                            disabled={pagination.page >= Math.ceil(pagination.total / pagination.limit) || pagination.total === 0}
-                            onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                        >
-                            <ChevronRight size={20} />
-                        </Button>
-                    </div>
-                </div>
+                <Pagination
+                    currentPage={pagination.page}
+                    totalPages={Math.ceil(pagination.total / pagination.limit) || 1}
+                    totalItems={pagination.total}
+                    limit={pagination.limit}
+                    onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
+                />
             </div>
         </div>
     );

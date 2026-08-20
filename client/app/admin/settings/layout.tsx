@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Settings, Settings2, Menu, X } from "lucide-react";
+import { User, Settings, Settings2, Menu, X, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Section from "@/components/ui/Section";
 import Button from "@/components/ui/Button";
@@ -19,6 +19,11 @@ const SETTINGS_LINKS = [
     href: "/admin/settings/profile",
     icon: User,
   },
+  {
+    name: 'Users Management',
+    href: '/admin/settings/role-permission',
+    icon: Users
+  }
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

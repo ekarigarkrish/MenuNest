@@ -2,7 +2,8 @@ import customerModel from "../model/customer.model.js";
 import tableModel from "../model/table.model.js";
 import orderModel from "../model/order.model.js";
 import { getIo } from "../config/socket.config.js";
-
+import userModel from "../model/user.model.js";
+import { sendWhatsAppMessage } from "./sendMessage.service.js";
 
 export default {
     placeOrder: async (socket, data) => {
@@ -19,7 +20,7 @@ export default {
                 }
             })
 
-            const tablePromise = tableModel.findOne({ where: { tableToken }, attributes: ['id', 'name'] })
+            const tablePromise = tableModel.findOne({ where: { tableToken }, attributes: ['id', 'name', 'userId'] })
             const [[customer], table] = await Promise.all([customerPromise, tablePromise])
 
             if (!table) {
@@ -29,6 +30,14 @@ export default {
                 })
                 return
             }
+
+            const staff = await userModel.findOne({ where: { id: table.userId }, attributes: ['phone'], raw: true })
+            const orderDetails = cart.map(item => `${item.qty} x ${item.name}`).join('\n');
+            const messageBody = `*New Order* 🍽️\n*Table:* ${table.name}\n*Status:* pending\n*Customer:* ${firstName.trim()} ${lastName.trim()}\n\n*Order Details:*\n${orderDetails}`;
+
+            sendWhatsAppMessage(staff.phone, messageBody).catch((error) => {
+                console.error('WhatsApp notification failed:', error);
+            })
 
             const order = await orderModel.create({
                 tableId: table.id, customerId: customer.id, order: cart,

@@ -13,12 +13,21 @@ const tableModel = sequelize.define("tables", {
     },
     tableToken: {
         type: DataTypes.STRING,
-        unique:true,
+        unique: true,
         allowNull: false
     },
-    qrLogo:{
+    qrLogo: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        },
+        onDelete: 'SET NULL'
     }
 }, {
     timestamps: true,
