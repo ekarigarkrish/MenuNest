@@ -1,11 +1,12 @@
 import { ApiError, asyncHandler } from "../utils/helper.utils.js";
-import { orderModel, tableModel, customerModel } from "../model/assoication.js";
+import { orderModel, tableModel, customerModel, userModel } from "../model/assoication.js";
 import restaurantModel from "../model/restaurant.model.js";
 import puppeteer from "puppeteer";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Op } from "sequelize";
+import { sendWhatsAppMessage } from "../services/sendMessage.service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,7 +26,7 @@ export default {
                 { id: { [Op.like]: `%${search}%` } },
                 { orderId: { [Op.like]: `%${search}%` } },
                 { '$table.name$': { [Op.like]: `%${search}%` } }
-            ];
+            ]
         }
 
         if (startDate || endDate) {
@@ -116,6 +117,8 @@ export default {
                 [Op.or]: [
                     { status: { [Op.ne]: "completed" } },
                     { status: "completed", updatedAt: { [Op.gte]: tenMinutesAgo } },
+                    // { status: { [Op.ne]: "cancelled" } },
+                    // { status: "cancelled", updatedAt: { [Op.gte]: tenMinutesAgo } },
                 ],
             },
             include: [{
@@ -182,6 +185,14 @@ export default {
         if (status === 'cancelled') order.total = order.order.reduce((acc, item) => (acc + (item.discountPrice * item.qty)), 0)
         order.status = status;
         await order.save();
+
+        const table = await tableModel.findByPk(order.tableId, { attributes: ['userId', 'name'], raw: true })
+        const staff = await userModel.findOne({ where: { id: table.userId }, attributes: ['phone'], raw: true })
+
+        const message = `*Order Status Update* 🍽️\n*Table:* ${table.name}\n*Status:* ${status}`;
+        sendWhatsAppMessage(staff.phone, message).catch((error) => {
+            console.error('WhatsApp notification failed:', error);
+        })
 
         return res.status(200).json({
             success: true,

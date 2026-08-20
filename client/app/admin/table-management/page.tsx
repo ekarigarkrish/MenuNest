@@ -207,9 +207,9 @@ export default function AdminTableMangementPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {tables?.map((table) => (
+            {tables?.map((table, index) => (
               <TableCard
-                key={table.id}
+                key={`table-${index}`}
                 table={table}
                 onOpenQrModal={openQrModal}
                 onOpenEditModal={openEditModal}
