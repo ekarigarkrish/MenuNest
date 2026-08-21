@@ -8,6 +8,7 @@ import { Fetch } from "@/config/axios.config";
 export interface SelectOption {
   label: string;
   value: string;
+  altText?: string;
 }
 
 // ─── Single-select variant (existing behaviour, backward-compatible) ─────────
@@ -91,15 +92,15 @@ const Select: React.FC<SelectProps> = (props) => {
   const filteredOptions = api
     ? finalOptions
     : finalOptions.filter((option) =>
-        option.label?.toLowerCase().includes(searchQuery?.toLowerCase())
-      );
+      option.label?.toLowerCase().includes(searchQuery?.toLowerCase())
+    );
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
   const selectedValues: string[] = multiple
     ? (props.value as string[])
     : (props.value as string)
-    ? [(props.value as string)]
-    : [];
+      ? [(props.value as string)]
+      : [];
 
   const isSelected = (val: string) => selectedValues.includes(val);
 
@@ -172,13 +173,12 @@ const Select: React.FC<SelectProps> = (props) => {
         {/* Trigger */}
         <div
           onClick={() => !isOpen && setIsOpen(true)}
-          className={`w-full h-auto px-4 py-2.5 bg-white border cursor-pointer flex items-center justify-between gap-2 ${
-            error
+          className={`w-full h-auto px-4 py-2.5 bg-white border cursor-pointer flex items-center justify-between gap-2 ${error
               ? "border-red-500 focus-within:ring-4 focus-within:ring-red-500/10 focus-within:border-red-500"
               : isOpen
-              ? "border-cayenne-red-500 ring-4 ring-cayenne-red-500/10"
-              : "border-gray-200 hover:border-gray-300"
-          } rounded-xl text-sm outline-none transition-all shadow-sm ${className}`}
+                ? "border-cayenne-red-500 ring-4 ring-cayenne-red-500/10"
+                : "border-gray-200 hover:border-gray-300"
+            } rounded-xl text-sm outline-none transition-all shadow-sm ${className}`}
         >
           {/* Left side content */}
           <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-0">
@@ -218,9 +218,8 @@ const Select: React.FC<SelectProps> = (props) => {
               /* Single-select display label / placeholder */
               !multiple && (
                 <span
-                  className={`font-medium text-left truncate ${
-                    !selectedOption ? "text-gray-400" : "text-gray-900"
-                  }`}
+                  className={`font-medium text-left truncate ${!selectedOption ? "text-gray-400" : "text-gray-900"
+                    }`}
                 >
                   {selectedOption ? selectedOption.label : placeholder}
                 </span>
@@ -245,9 +244,8 @@ const Select: React.FC<SelectProps> = (props) => {
           >
             <ChevronDown
               size={18}
-              className={`text-gray-500 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </div>
         </div>
@@ -306,15 +304,19 @@ const Select: React.FC<SelectProps> = (props) => {
                         variant="ghost"
                         type="button"
                         onClick={() => handleOptionClick(option.value)}
-                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-start group rounded-none ${
-                          active
+                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-start group rounded-none ${active
                             ? "bg-cayenne-red-50 text-cayenne-red-600 font-medium"
                             : "text-gray-700 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
-                        <span className="flex-1">{option.label}</span>
+                        <span className="flex-1 truncate">{option.label}</span>
+                        {option.altText && (
+                          <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md ml-2 shrink-0 border border-gray-200">
+                            {option.altText}
+                          </span>
+                        )}
                         {active && (
-                          <Check size={16} className="text-cayenne-red-500 shrink-0" />
+                          <Check size={16} className="text-cayenne-red-500 shrink-0 ml-3" />
                         )}
                       </Button>
                     );
