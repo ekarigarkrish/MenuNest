@@ -32,12 +32,14 @@ export default {
             }
 
             const staff = await userModel.findOne({ where: { id: table.userId }, attributes: ['phone'], raw: true })
-            const orderDetails = cart.map(item => `${item.qty} x ${item.name}`).join('\n');
-            const messageBody = `*New Order* 🍽️\n*Table:* ${table.name}\n*Status:* pending\n*Customer:* ${firstName.trim()} ${lastName.trim()}\n\n*Order Details:*\n${orderDetails}`;
+            if (staff && staff.phone) {
+                const orderDetails = cart.map(item => `${item.qty} x ${item.name}`).join('\n');
+                const messageBody = `*New Order* 🍽️\n*Table:* ${table.name}\n*Status:* pending\n*Customer:* ${firstName.trim()} ${lastName.trim()}\n\n*Order Details:*\n${orderDetails}`;
 
-            sendWhatsAppMessage(staff.phone, messageBody).catch((error) => {
-                console.error('WhatsApp notification failed:', error);
-            })
+                sendWhatsAppMessage(staff.phone, messageBody).catch((error) => {
+                    console.error('WhatsApp notification failed:', error);
+                })
+            }
 
             const order = await orderModel.create({
                 tableId: table.id, customerId: customer.id, order: cart,

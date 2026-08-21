@@ -13,6 +13,7 @@ import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
+import { sendWhatAppsMessage } from "@/lib/sendWhatAppMessage"
 
 const DeleteUserRoleModal = dynamic(() => import("./_components/DeleteUserRoleModal"), {
     ssr: false,
@@ -36,15 +37,16 @@ export default React.memo(function RolePermissionPage() {
         defaultValues: { name: '', phone: '+91', role: 'staff', tables: [] }
     })
 
-
     const { data: TablesData = [] } = useQuery({
         queryKey: ['tables'],
         queryFn: async () => {
             const res = await Fetch.get('/api/table/all/data', { withCredentials: true, withXSRFToken: true })
             return res.data.success
-                ? res.data.data.map((table: any) => ({ label: table.name, value: table.id }))
+                ? res.data.data.map((table: any) => ({ label: table.name, value: table.id, altText: table.userId ? 'Assigned' : 'UnAssigned' }))
                 : []
-        }
+        },
+        staleTime: 0,
+        refetchOnMount: true
     })
 
     const { data: rolesResponse, refetch: roleRefetch, isLoading: roleIsLoading } = useQuery({
@@ -130,26 +132,8 @@ export default React.memo(function RolePermissionPage() {
         }
     }
 
-    const sendTestMessage = async ({ phone }: { phone: string }) => {
-        try {
-            const myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-
-            const urlencoded = new URLSearchParams();
-            urlencoded.append("token", "7mpebaoqdbfoug89");
-            urlencoded.append("to", phone);
-            urlencoded.append("body", "Hello from Menunest");
-
-            fetch('https://api.ultramsg.com/instance188886/messages/chat', {
-                method: 'POST',
-                headers: myHeaders,
-                body: urlencoded,
-                redirect: 'follow'
-            })
-        } catch (error) {
-            console.error(error);
-
-        }
+    const sendTestMessage = ({ phone }: { phone: string }) => {
+        sendWhatAppsMessage(phone, `This is a test message.`)
     }
 
     return (

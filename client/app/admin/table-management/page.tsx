@@ -29,7 +29,9 @@ export default function AdminTableMangementPage() {
     queryFn: async () => {
       const res = await Fetch.get('/api/table/all/data', { withCredentials: true, withXSRFToken: true });
       return res.data.data;
-    }
+    },
+    staleTime: 0,
+    refetchOnMount: true
   });
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -52,10 +54,7 @@ export default function AdminTableMangementPage() {
       return res.data;
     },
     onSuccess: (data: any) => {
-      queryClient.setQueryData(['tables'], (old: TableData[] = []) => [
-        ...old,
-        { id: data.table?.id, name: data.table?.name, tableToken: data.table?.tableToken, qrLogo: `${data.table?.qrLogo}` }
-      ]);
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
       setIsAddModalOpen(false);
       toast.success(data.message || "Table added successfully");
     },
@@ -74,10 +73,7 @@ export default function AdminTableMangementPage() {
       return res.data;
     },
     onSuccess: (data: any) => {
-      queryClient.setQueryData(['tables'], (old: TableData[] = []) => [
-        ...old,
-        ...(data.tables || [])
-      ]);
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
       setIsBulkAddModalOpen(false);
       toast.success(data.message || "Tables added successfully");
       if (data.skipped?.length > 0) {
@@ -100,12 +96,7 @@ export default function AdminTableMangementPage() {
       return res.data;
     },
     onSuccess: (data: any) => {
-      queryClient.setQueryData(['tables'], (old: TableData[] = []) => old.map(t => {
-        if (t.id === data.table?.id) {
-          return { ...t, name: data.table.name, qrLogo: data.table.qrLogo };
-        }
-        return t;
-      }));
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
       setIsEditModalOpen(false);
       toast.success(data.message || "Table updated successfully");
     },
@@ -139,7 +130,7 @@ export default function AdminTableMangementPage() {
       return res.data;
     },
     onSuccess: (data: any, id: string) => {
-      queryClient.setQueryData(['tables'], (old: TableData[] = []) => old.filter((t) => t.id !== id));
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
       setIsDeleteModalOpen(false);
       setTableToDelete(null);
       toast.success(data.message || "Table deleted successfully");
