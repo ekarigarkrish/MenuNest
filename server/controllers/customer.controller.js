@@ -1,9 +1,11 @@
 import { ApiError, asyncHandler, signToken } from "../utils/helper.utils.js";
 import { customerModel, orderModel } from "../model/assoication.js";
 import { Op } from "sequelize";
-import ExcelJS from "exceljs"
+import crypto from 'crypto'
 import config from "../config/config.js";
 import { exportExcel } from "../utils/export.utils.js";
+import bcrypt from "bcryptjs";
+import { sendWhatsAppMessage } from "../services/sendMessage.service.js";
 
 export default {
     checkCustomerByPhone: asyncHandler(async (req, res) => {
@@ -151,7 +153,7 @@ export default {
             order: [["createdAt", "DESC"]],
             raw: true,
         });
-        if (customers.length === 0)  throw ApiError("No customers found", 404)
+        if (customers.length === 0) throw ApiError("No customers found", 404)
 
         const rows = customers.map(customer => ({
             ...customer,
@@ -168,8 +170,8 @@ export default {
 
         res.setHeader(
             "Content-Type",
-            format === 'xlsx' ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : 
-            format === 'csv' ? 'text/csv' : 'application/json'
+            format === 'xlsx' ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" :
+                format === 'csv' ? 'text/csv' : 'application/json'
         );
 
         res.setHeader(
@@ -179,5 +181,50 @@ export default {
 
         await workbook.xlsx.write(res);
         return res.end();
-    }, 'exportCustomersInfo')
+    }, 'exportCustomersInfo'),
+
+
+    sendOtp: asyncHandler(async (req, res) => {
+        const { phone } = req.body;
+        const { customer: { customerId } } = req;
+
+        if (!phone) throw ApiError('Phone number is required', 400)
+
+        const otp = crypto.randomInt(1000, 10000).toString();
+        const hashedOtp = await bcrypt.hash(otp.toString(), 10);
+
+        const customer = await customerModel.update(
+            {
+                hashOtp: hashedOtp,
+                isVerified: false,
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+            },
+            {
+                where: { id: customerId },
+                raw: true
+            }
+        )
+        if (!customer) throw ApiError('Try to resend OTP!', 400)
+
+        sendWhatsAppMessage(phone, `Hello, Your OTP is ${otp}\nThis code is valid for 5 minutes`)
+        return res.status(200).json({ success: true, message: "OTP sent successfully", otp, hashedOtp, phone })
+    }, 'sendOtp'),
+
+    verifyOtp: asyncHandler(async (req, res) => {
+        const { customer: { customerId } } = req;
+        const { otp } = req.body;
+
+        const customer = await customerModel.findByPk(customerId, { raw: true });
+
+        if (!customer) throw ApiError("Something went wrong!", 404)
+        if (customer.isVerified) throw ApiError("You are already verified!", 400)
+        if (new Date(customer.expiresAt) < new Date()) throw ApiError("OTP is expired!", 400)
+
+        const isVerified = await bcrypt.compare(otp, customer.hashOtp);
+        if (!isVerified) throw ApiError("Invalid OTP!", 400);
+
+        await customerModel.update({ isVerified: true, hashOtp: "", expiresAt: null }, { where: { id: customerId } });
+
+        return res.status(200).json({ success: true, message: "OTP verified successfully" });
+    }, 'verifyOtp')
 }

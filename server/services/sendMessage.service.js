@@ -2,7 +2,7 @@
 const instanceId = 'instance188886'
 const token = '7mpebaoqdbfoug89'
 
-export const sendWhatsAppMessage =async (phone, message) => {
+export const sendWhatsAppMessage = async (phone, message) => {
     try {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
