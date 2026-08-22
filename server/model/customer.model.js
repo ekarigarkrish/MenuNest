@@ -15,6 +15,18 @@ const customerModel = sequelize.define('customers', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    hashOtp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    isVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    expiresAt:{
+        type:DataTypes.DATE,
+        allowNull:true,
+    }
 }, {
     timestamps: true,
     tableName: 'customers'
