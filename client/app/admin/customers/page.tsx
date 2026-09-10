@@ -47,7 +47,7 @@ export default function CustomerManagementPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [filterDate, setDate] = useState<DateRange>({ from: null, to: null });
-    const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 1, total: 0 })
+    const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 12, total: 0 })
 
     const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
     const exportMenuRef = useRef<HTMLDivElement>(null);

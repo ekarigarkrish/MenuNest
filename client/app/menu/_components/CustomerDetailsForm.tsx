@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { Fetch } from "@/config/axios.config";
+import { toast } from "sonner";
+import OtpVerificationModal from "@/components/ui/OtpVerificationModal";
 
 export type CustomerDetails = {
     phone: string;
@@ -25,6 +27,7 @@ export default React.memo(function CustomerDetailsForm({
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showOtpModal, setShowOtpModal] = useState(false);
 
     // Reset form when opened
     React.useEffect(() => {
@@ -57,25 +60,56 @@ export default React.memo(function CustomerDetailsForm({
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (firstName.trim() && lastName.trim()) {
-            onSubmit({ phone, firstName, lastName });
-            onClose();
+            try {
+                setIsLoading(true);
+                const res = await Fetch.post('/api/customer/onbroading/send/otp', { phone, firstName, lastName }, { withCredentials: true, withXSRFToken: true });
+                if (res.data?.success) {
+                    toast.success(res.data?.message || "OTP sent successfully");
+                    setShowOtpModal(true);
+                }
+            } catch (error: any) {
+                toast.error(error?.response?.data?.message || "Failed to send OTP");
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
-    return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            size="sm"
-            closeOnOverlayClick
-            title={
-                <div className="flex items-center gap-3">
-                    <span>{step === 1 ? "Glad to see you here." : "What should we call you?"}</span>
-                </div>
+    const handleVerifyOtp = async (otp: string) => {
+        setIsLoading(true);
+        try {
+            const res = await Fetch.post('/api/customer/onbroading/verify/otp', { phone, otp }, { withCredentials: true, withXSRFToken: true });
+            
+            if (res.data?.success) {
+                toast.success(res.data?.message || "Verified successfully");
+                setShowOtpModal(false);
+                onSubmit({ phone, firstName, lastName });
+                onClose();
+            } else {
+                toast.error(res.data?.message || "Failed to verify OTP");
             }
-        >
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || 'Invalid OTP');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    return (
+        <>
+            <Modal
+                isOpen={isOpen}
+                onClose={onClose}
+                size="sm"
+                closeOnOverlayClick
+                title={
+                    <div className="flex items-center gap-3">
+                        <span>{step === 1 ? "Glad to see you here." : "What should we call you?"}</span>
+                    </div>
+                }
+            >
 
             <AnimatePresence mode="wait">
                 {step === 1 ? (
@@ -159,5 +193,17 @@ export default React.memo(function CustomerDetailsForm({
                 )}
             </AnimatePresence>
         </Modal>
+
+        <OtpVerificationModal
+            isOpen={showOtpModal}
+            onClose={() => setShowOtpModal(false)}
+            phone={phone}
+            onVerify={handleVerifyOtp}
+            isLoading={isLoading}
+            onResendOtp={async () => {
+                await Fetch.post('/api/customer/onbroading/send/otp', { phone, firstName, lastName }, { withCredentials: true, withXSRFToken: true });
+            }}
+        />
+        </>
     );
 })

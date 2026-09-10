@@ -115,11 +115,29 @@ export default {
         const { count, rows } = await orderModel.findAndCountAll({
             where: {
                 [Op.or]: [
-                    { status: { [Op.ne]: "completed" } },
-                    { status: "completed", updatedAt: { [Op.gte]: tenMinutesAgo } },
-                    // { status: { [Op.ne]: "cancelled" } },
-                    // { status: "cancelled", updatedAt: { [Op.gte]: tenMinutesAgo } },
-                ],
+                    // Active orders
+                    {
+                        status: {
+                            [Op.notIn]: ["completed", "cancelled"]
+                        }
+                    },
+
+                    // Completed orders visible for 10 minutes
+                    {
+                        status: "completed",
+                        updatedAt: {
+                            [Op.gte]: tenMinutesAgo
+                        }
+                    },
+
+                    // Cancelled orders visible for 10 minutes
+                    {
+                        status: "cancelled",
+                        updatedAt: {
+                            [Op.gte]: tenMinutesAgo
+                        }
+                    }
+                ]
             },
             include: [{
                 model: tableModel,

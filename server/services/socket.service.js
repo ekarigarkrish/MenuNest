@@ -12,16 +12,18 @@ export default {
             const { tableToken, cart, tax, gst_type, gst_rate, total, firstName, lastName, phone, orderId, paymentMode } = data;
             //  console.log("🏓 Received place_order from " + socket.id, data);
 
-            const customerPromise = await customerModel.findOrCreate({
-                where: { phone: phone.trim() },
-                defaults: {
-                    name: `${firstName.trim()} ${lastName.trim()}`,
-                    phone: phone.trim()
-                }
-            })
+            // const customerPromise = await customerModel.findOrCreate({
+            //     where: { phone: phone.trim() },
+            //     defaults: {
+            //         name: `${firstName.trim()} ${lastName.trim()}`,
+            //         phone: phone.trim()
+            //     }
+            // })
 
-            const tablePromise = tableModel.findOne({ where: { tableToken }, attributes: ['id', 'name', 'userId'] })
-            const [[customer], table] = await Promise.all([customerPromise, tablePromise])
+            const [customer, table] = await Promise.all([
+                customerModel.findOne({ where: { phone: phone.trim() } }),
+                tableModel.findOne({ where: { tableToken }, attributes: ['id', 'name', 'userId'] })
+            ])
 
             if (!table) {
                 socket.emit("order_error", {
@@ -29,7 +31,7 @@ export default {
                     message: "Table not found. Please scan a valid QR code.",
                 })
                 return
-            }
+            }           
 
             const staff = await userModel.findOne({ where: { id: table.userId }, attributes: ['phone'], raw: true })
             if (staff && staff.phone) {

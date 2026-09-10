@@ -34,6 +34,64 @@ export default {
         return res.status(200).json({ success: true, exists: false });
     }, 'checkCustomerByPhone'),
 
+    sendOnboardingOtp: asyncHandler(async (req, res) => {
+        const { phone, firstName, lastName } = req.body;
+        if (!phone) throw ApiError('Phone number is required', 400);
+
+        const isExistingUser = await customerModel.findOne({ where: { phone } });
+        if (isExistingUser) throw ApiError('User Already Exists! Please Verify', 400);
+
+        const otp = crypto.randomInt(1000, 10000).toString();
+        const hashedOtp = await bcrypt.hash(otp.toString(), 10);
+
+        const response = await customerModel.create(
+            {
+                name: `${firstName} ${lastName}`,
+                phone,
+                hashOtp: hashedOtp,
+                isVerified: false,
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+            },
+            { raw: true })
+        if (!response) throw ApiError('Failed to create customer', 400);
+
+        sendWhatsAppMessage(phone, `Hello, Your OTP is ${otp}\nThis code is valid for 5 minutes`)
+
+        return res.status(200).json({
+            success: true,
+            message: 'Customer created successfully',
+        });
+
+    }, 'sendOnboardingOtp'),
+
+    verifyOnboardingOtp: asyncHandler(async (req, res) => {
+        const { phone, otp } = req.body;
+        if (!phone || !otp) throw ApiError('Phone number and OTP are required', 400);
+
+        const customer = await customerModel.findOne({ where: { phone } });
+        if (!customer) throw ApiError('Something went wrong!', 404);
+
+        const isMatch = await bcrypt.compare(otp.toString(), customer.hashOtp);
+        if (!isMatch) throw ApiError('Invalid OTP', 400);
+
+        customer.isVerified = true;
+        customer.hashOtp = null;
+        customer.expiresAt = null;
+        await customer.save();
+
+        const token = signToken({ customerId: customer.id, role: 'customer' })
+        res.cookie('customer-token', token, {
+            httpOnly: false,
+            secure: !config.isDEV,
+            sameSite: config.isDEV ? 'lax' : 'none',
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: 'Customer verified successfully',
+        });
+    }, 'verifyOnboardingOtp'),
+
     getCustomers: asyncHandler(async (req, res) => {
         let { search, startDate, endDate, page, limit } = req.query;
 
@@ -42,13 +100,15 @@ export default {
         const offset = (page - 1) * limit;
         let where = {};
 
+        where.isVerified = true;
+
         if (search) {
             where = {
                 [Op.or]: [
                     { name: { [Op.like]: `%${search}%` } },
                     { phone: { [Op.like]: `%${search}%` } },
                     { '$orders.id$': { [Op.like]: `%${search}%` } }
-                ]
+                ],
             };
         }
 
