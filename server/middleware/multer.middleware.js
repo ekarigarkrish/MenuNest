@@ -20,7 +20,7 @@ const createStorage = (dir) => {
     })
 }
 
-const getFileFilter = (req, file, cb) => {
+const fileFilter = (req, file, cb) => {
     if (!file || !file.originalname) {
         return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'Missing file name'), false)
     }
@@ -51,7 +51,8 @@ export const checkSizeLimits = (fieldRules) => async (req, res, next) => {
                 if (file?.size > limitInBytes) {
                     await Promise.all(files.map(file => deleteFile(file.path)))
                     return res.status(400).json({
-                        success: false, message: `${rule.field_name} exceeds ${rule.size}KB size limit`
+                        success: false,
+                        message: `${rule.field_name} exceeds ${rule.size}KB size limit`
                     })
                 }
             }
@@ -139,7 +140,7 @@ export const handlemulterError = (err, req, res, next) => {
 export const upload = (folder = '') => {
     return multer({
         storage: createStorage(folder),
-        fileFilter: getFileFilter,
+        fileFilter,
         limits: {
             fileSize: 2 * 1024 * 1024, // 2MB
         },

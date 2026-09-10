@@ -84,7 +84,7 @@ export default React.memo(function UpdateCustomerDetailsForm({
                 onClose={onClose}
                 size="sm"
                 closeOnOverlayClick
-                title="Update Profile"
+                title="Edit Info"
             >
                 <div className="space-y-4">
                     <div className="relative flex items-center">

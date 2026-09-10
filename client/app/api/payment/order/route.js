@@ -1,5 +1,5 @@
 import axios from "axios";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import config from "../../../../config/config";
 
 export async function POST(req) {

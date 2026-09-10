@@ -59,7 +59,7 @@ export default React.memo(function CartDrawer({
 
     const [isPlacing, setIsPlacing] = useState(false);
     const [isOrderPlaced, setIsOrderPlaced] = useState(false);
-
+  
     const handleClose = () => {
         setIsOrderPlaced(false);
         if (isOnlinePaymentSuccess && isOnlinePaymentSuccess == "true") {
